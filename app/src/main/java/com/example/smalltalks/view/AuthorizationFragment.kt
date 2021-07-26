@@ -21,7 +21,11 @@ class AuthorizationFragment : BaseFragment<AuthorizationViewModel, FragmentAutho
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //TODO
+        binding.buttonLogin.setOnClickListener {
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_container, ChatFragment.newInstance())
+                .commit()
+        }
     }
 
     companion object {

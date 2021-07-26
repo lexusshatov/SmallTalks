@@ -5,11 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import com.example.smalltalks.R
-import com.example.smalltalks.databinding.FragmentAuthorizationBinding
 import com.example.smalltalks.databinding.FragmentChatBinding
 import com.example.smalltalks.view.base.BaseFragment
-import com.example.smalltalks.viewmodel.AuthorizationViewModel
 import com.example.smalltalks.viewmodel.ChatViewModel
 
 class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
@@ -28,6 +25,6 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
 
     companion object {
 
-        fun newInstance() = ChatViewModel()
+        fun newInstance() = ChatFragment()
     }
 }
