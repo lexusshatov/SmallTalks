@@ -17,6 +17,11 @@ abstract class BaseFragment<VM : ViewModel, VB : ViewBinding> : Fragment() {
     val binding: VB
         get() = bindingInternal!!
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
