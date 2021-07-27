@@ -3,7 +3,7 @@ package com.example.smalltalks.view.base
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.smalltalks.R
-import com.example.smalltalks.view.AuthorizationFragment
+import com.example.smalltalks.view.authorization.AuthorizationFragment
 
 class HostActivity : AppCompatActivity() {
 
