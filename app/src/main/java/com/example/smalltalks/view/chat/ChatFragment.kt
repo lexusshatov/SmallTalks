@@ -1,12 +1,18 @@
-package com.example.smalltalks.view
+package com.example.smalltalks.view.chat
 
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentChatBinding
 import com.example.smalltalks.view.base.BaseFragment
+import com.example.smalltalks.view.user_list.UserListFragment
 import com.example.smalltalks.viewmodel.ChatViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.withContext
 
 class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
 
@@ -17,9 +23,24 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
             FragmentChatBinding.inflate(inflater, container, false)
         }
 
+    private val adapter = ChatAdapter()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //TODO
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = this@ChatFragment.adapter
+        }
+
+        lifecycleScope.launchWhenStarted {
+            withContext(Dispatchers.IO) {
+                viewModel.data.collect {
+                    withContext(Dispatchers.Main) {
+                        adapter.add(it)
+                    }
+                }
+            }
+        }
     }
 
     companion object {
