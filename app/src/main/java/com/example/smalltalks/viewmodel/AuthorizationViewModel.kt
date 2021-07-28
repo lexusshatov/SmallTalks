@@ -134,7 +134,7 @@ class AuthorizationViewModel @Inject constructor(
     }
 
     private companion object {
-        val TAG = UserListViewModel::class.java.simpleName
+        val TAG: String = UserListViewModel::class.java.simpleName
         const val EMULATOR_IP = "10.0.2.2"
         const val HOST_BROADCAST = "255.255.255.255"
         const val PORT_BROADCAST = 8888
