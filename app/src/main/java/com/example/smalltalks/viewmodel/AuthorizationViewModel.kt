@@ -12,10 +12,7 @@ import com.example.smalltalks.model.remote_protocol.UdpDto
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runInterruptible
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -36,19 +33,23 @@ class AuthorizationViewModel @Inject constructor(
         get() = mutableData
 
     fun connect(userName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
             try {
-                val ip = withTimeout(TIMEOUT_BROADCAST) { getServerIp() }
+                val ip = withTimeout(TIMEOUT_BROADCAST) { getServerIpAsync().await() }
+                    .getOrThrow()
                 Log.d(TAG, "Server IP: $ip")
 
-                val socket = withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServer(ip) }
+                val socket = withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServerAsync(ip).await() }
+                    .getOrThrow()
+                Log.d(TAG, "test")
                 val input = BufferedReader(InputStreamReader(socket.getInputStream()))
                 val output = PrintWriter(OutputStreamWriter(socket.getOutputStream()))
 
-                val userId = withTimeout(TIMEOUT_GET_UID) { getUserId(input) }
+                val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
+                    .getOrThrow()
                 Log.d(TAG, "User ID: $userId")
 
-                connectUser(output, userId, userName)
+                connectUserAsync(output, userId, userName)
                 mutableData.postValue(true)
             } catch (e: Exception) {
                 mutableData.postValue(false)
@@ -57,60 +58,69 @@ class AuthorizationViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getServerIp(): String = runInterruptible {
-        if (isEmulator()) EMULATOR_IP
-        else {
-            val buffer = ByteArray(100)
-            val packet = DatagramPacket(
-                buffer,
-                buffer.size,
-                InetAddress.getByName(HOST_BROADCAST),
-                PORT_BROADCAST
-            )
-            DatagramSocket().apply {
-                send(packet)
-                receive(packet)
-                close()
-            }
-            val message = String(packet.data).trim { it.code == 0 }
-            val udpDto = gson.fromJson(message, UdpDto::class.java)
+    private fun getServerIpAsync() =
+        GlobalScope.async {
+            runCatching {
+                if (isEmulator()) EMULATOR_IP
+                else {
+                    val buffer = ByteArray(100)
+                    val packet = DatagramPacket(
+                        buffer,
+                        buffer.size,
+                        InetAddress.getByName(HOST_BROADCAST),
+                        PORT_BROADCAST
+                    )
+                    DatagramSocket().apply {
+                        send(packet)
+                        receive(packet)
+                        close()
+                    }
+                    val message = String(packet.data).trim { it.code == 0 }
+                    val udpDto = gson.fromJson(message, UdpDto::class.java)
 
-            udpDto.ip
-        }
+                    udpDto.ip
+                }
+            }
     }
 
-    private suspend fun connectToServer(ip: String) =
-        runInterruptible {
-            Socket(ip, PORT_SERVER)
+    private fun connectToServerAsync(ip: String) =
+        GlobalScope.async {
+            runCatching {
+                Socket(ip, PORT_SERVER)
+            }
         }
 
 
-    private suspend fun getUserId(input: BufferedReader): String =
-        runInterruptible {
-            gson.fromJson(
+    private fun getUserIdAsync(input: BufferedReader) =
+        GlobalScope.async {
+            runCatching {
                 gson.fromJson(
-                    input.readLine(),
-                    BaseDto::class.java
-                ).payload,
-                ConnectedDto::class.java
-            ).id
+                    gson.fromJson(
+                        input.readLine(),
+                        BaseDto::class.java
+                    ).payload,
+                    ConnectedDto::class.java
+                ).id
+            }
         }
 
-    private suspend fun connectUser(output: PrintWriter, userId: String, userName: String) {
-        runInterruptible {
-            output.println(
-                gson.toJson(
-                    BaseDto(
-                        BaseDto.Action.CONNECT,
-                        gson.toJson(
-                            ConnectDto(
-                                userId,
-                                userName
+    private fun connectUserAsync(output: PrintWriter, userId: String, userName: String) {
+        GlobalScope.async {
+            runCatching {
+                output.println(
+                    gson.toJson(
+                        BaseDto(
+                            BaseDto.Action.CONNECT,
+                            gson.toJson(
+                                ConnectDto(
+                                    userId,
+                                    userName
+                                )
                             )
                         )
                     )
                 )
-            )
+            }
         }
     }
 
