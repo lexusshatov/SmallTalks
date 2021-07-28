@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.example.smalltalks.model.*
 import com.example.smalltalks.view.authorization.ContractAuthorizationView
 import com.google.gson.Gson
+import kotlinx.coroutines.runInterruptible
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -24,7 +25,6 @@ class AuthorizationViewModel(
 
     suspend fun connect(userName: String) {
         try {
-            println("TUT")
             println(getServerIp())
             val inout = connectToServer(getServerIp())
             input = inout.first
@@ -33,7 +33,7 @@ class AuthorizationViewModel(
                 //get user id from server
                 userId = gson.fromJson(
                     gson.fromJson(
-                        input.readLine(),
+                        runInterruptible { input.readLine() },
                         BaseDto::class.java
                     ).payload,
                     ConnectedDto::class.java
@@ -51,28 +51,7 @@ class AuthorizationViewModel(
                     )
                 )
             )
-            output.flush()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun disconnect() {
-        try {
-            val disconnectDto = BaseDto(
-                BaseDto.Action.DISCONNECT,
-                gson.toJson(
-                    DisconnectDto(
-                        userId!!,
-                        0
-                    )
-                )
-            )
-            output.println(gson.toJson(disconnectDto))
-            output.flush()
-            input.close()
-            output.close()
-            socket.close()
+            runInterruptible { output.flush() }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -106,6 +85,27 @@ class AuthorizationViewModel(
         val output = PrintWriter(OutputStreamWriter(socket.getOutputStream()))
 
         return Pair(input, output)
+    }
+
+    private fun disconnect() {
+        try {
+            val disconnectDto = BaseDto(
+                BaseDto.Action.DISCONNECT,
+                gson.toJson(
+                    DisconnectDto(
+                        userId!!,
+                        0
+                    )
+                )
+            )
+            output.println(gson.toJson(disconnectDto))
+            output.flush()
+            input.close()
+            output.close()
+            socket.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onCleared() {

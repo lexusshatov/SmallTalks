@@ -55,6 +55,8 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
         return true
     }
 
+
+
     companion object {
 
         fun newInstance() = UserListFragment()
