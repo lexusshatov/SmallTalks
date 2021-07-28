@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smalltalks.databinding.ListItemBinding
-import com.example.smalltalks.model.User
+import com.example.smalltalks.model.remote_protocol.User
 
 class UserListAdapter : ListAdapter<User, UserListAdapter.ViewHolder>(UserDiffCallback()) {
 

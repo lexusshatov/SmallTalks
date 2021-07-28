@@ -1,4 +1,4 @@
-package com.example.smalltalks.model
+package com.example.smalltalks.model.remote_protocol
 
 data class UsersReceivedDto(val users: List<User>) : Payload
 

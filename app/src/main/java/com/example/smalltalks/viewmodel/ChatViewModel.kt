@@ -1,11 +1,11 @@
 package com.example.smalltalks.viewmodel
 
-import com.example.smalltalks.model.MessageDto
-import com.example.smalltalks.model.User
+import com.example.smalltalks.model.remote_protocol.MessageDto
+import com.example.smalltalks.model.remote_protocol.User
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import kotlinx.coroutines.flow.flow
 
-class ChatViewModel : BaseViewModel<MessageDto>() {
+class ChatViewModel : BaseViewModel() {
     override val data by lazy {
         // TODO
         flow {

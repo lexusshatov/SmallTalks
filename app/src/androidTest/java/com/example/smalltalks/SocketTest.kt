@@ -1,6 +1,6 @@
 package com.example.smalltalks
 
-import com.example.smalltalks.model.*
+import com.example.smalltalks.model.remote_protocol.*
 import com.google.gson.Gson
 import java.io.BufferedReader
 import java.io.InputStreamReader

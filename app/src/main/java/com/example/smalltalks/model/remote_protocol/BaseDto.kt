@@ -1,4 +1,4 @@
-package com.example.smalltalks.model
+package com.example.smalltalks.model.remote_protocol
 
 data class BaseDto(val action: Action, val payload: String) {
 

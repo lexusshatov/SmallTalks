@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smalltalks.databinding.ChatItemBinding
-import com.example.smalltalks.model.MessageDto
+import com.example.smalltalks.model.remote_protocol.MessageDto
 
 class ChatAdapter : ListAdapter<MessageDto, ChatAdapter.ViewHolder>(UserDiffCallback()) {
 
