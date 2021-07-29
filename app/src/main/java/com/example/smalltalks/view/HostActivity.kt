@@ -10,6 +10,7 @@ import com.example.smalltalks.view.authorization.AuthorizationFragment.Companion
 import com.example.smalltalks.view.authorization.AuthorizationFragment.Companion.USER_PREFERENCES
 import dagger.hilt.android.AndroidEntryPoint
 
+
 @AndroidEntryPoint
 class HostActivity : AppCompatActivity() {
 
@@ -29,8 +30,11 @@ class HostActivity : AppCompatActivity() {
                     remove(USER_NAME)
                     apply()
                 }
+            finish()
+            startActivity(intent)
+        } else {
+            super.onBackPressed()
         }
-        super.onBackPressed()
     }
 
     companion object {

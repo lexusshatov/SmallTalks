@@ -19,7 +19,6 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.Socket
 import javax.inject.Inject
-import kotlin.concurrent.thread
 
 @HiltViewModel
 class AuthorizationViewModel @Inject constructor(
@@ -142,7 +141,7 @@ class AuthorizationViewModel @Inject constructor(
     }
 
     private fun startPings(output: PrintWriter, userId: String) {
-        thread(start = true) {
+        viewModelScope.launch(Dispatchers.IO) {
             while (true) {
                 val pingMessage = gson.toJson(
                     BaseDto(
@@ -152,7 +151,7 @@ class AuthorizationViewModel @Inject constructor(
                 )
                 output.println(pingMessage)
                 output.flush()
-                Thread.sleep(5000)
+                delay(5000)
             }
         }
     }
