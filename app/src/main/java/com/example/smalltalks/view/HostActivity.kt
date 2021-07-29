@@ -1,4 +1,4 @@
-package com.example.smalltalks.view.base
+package com.example.smalltalks.view
 
 import android.content.Context
 import android.os.Bundle
