@@ -5,10 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.smalltalks.model.remote_protocol.BaseDto
-import com.example.smalltalks.model.remote_protocol.ConnectDto
-import com.example.smalltalks.model.remote_protocol.ConnectedDto
-import com.example.smalltalks.model.remote_protocol.UdpDto
+import com.example.smalltalks.model.remote_protocol.*
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +19,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.Socket
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
 @HiltViewModel
 class AuthorizationViewModel @Inject constructor(
@@ -35,10 +33,10 @@ class AuthorizationViewModel @Inject constructor(
     override val data: LiveData<Boolean>
         get() = mutableData
 
-    fun connect(userName: String) =
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val ip = withTimeout(TIMEOUT_BROADCAST) { getServerIpAsync().await() }
+    fun connect(userName: String) {
+        viewModelScope.launch(Dispatchers.Main) {
+            runCatching {
+                val ip = withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
                 Log.d(TAG, "Server IP: $ip")
 
                 //init socket, in/out streams
@@ -48,89 +46,114 @@ class AuthorizationViewModel @Inject constructor(
                 val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
                 Log.d(TAG, "User ID: $userId")
 
-                connectUserAsync(output, userId, userName)
-                mutableData.postValue(true)
-            } catch (e: Exception) {
-                mutableData.postValue(false)
-                e.printStackTrace()
-            } finally {
-                try {
-                    input.close()
-                    output.close()
-                    socket.close()
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                connectUser(output, userId, userName)
+                startPings(output, userId)
+            }
+                .onSuccess { mutableData.postValue(true) }
+                .onFailure { throwable ->
+                    Log.e(TAG, "Connect failed", throwable)
+                    mutableData.postValue(false)
+                    runCatching {
+                        input.close()
+                        output.close()
+                        socket.close()
+                    }.onFailure { Log.e(TAG, "Freeing resources failed", it) }
                 }
+        }
+    }
+
+    private suspend fun getServerAddressAsync() =
+        coroutineScope {
+            async(Dispatchers.IO) {
+                runCatching {
+                    if (isEmulator()) EMULATOR_IP
+                    else {
+                        val buffer = ByteArray(100)
+                        val packet = DatagramPacket(
+                            buffer,
+                            buffer.size,
+                            InetAddress.getByName(HOST_BROADCAST),
+                            PORT_BROADCAST
+                        )
+                        DatagramSocket().apply {
+                            send(packet)
+                            receive(packet)
+                            close()
+                        }
+                        val message = String(packet.data).trim { it.code == 0 }
+                        val udpDto = gson.fromJson(message, UdpDto::class.java)
+
+                        udpDto.ip
+                    }
+                }.getOrThrow()
             }
         }
 
-    private fun getServerIpAsync() =
-        viewModelScope.async(Dispatchers.IO) {
-            runCatching {
-                if (isEmulator()) EMULATOR_IP
-                else {
-                    val buffer = ByteArray(100)
-                    val packet = DatagramPacket(
-                        buffer,
-                        buffer.size,
-                        InetAddress.getByName(HOST_BROADCAST),
-                        PORT_BROADCAST
-                    )
-                    DatagramSocket().apply {
-                        send(packet)
-                        receive(packet)
-                        close()
+    private suspend fun connectToServerAsync(ip: String) =
+        coroutineScope {
+            launch(Dispatchers.IO) {
+                runCatching {
+                    Socket(ip, PORT_SERVER).apply {
+                        socket = this
+                        input = BufferedReader(InputStreamReader(getInputStream()))
+                        output = PrintWriter(OutputStreamWriter(getOutputStream()))
                     }
-                    val message = String(packet.data).trim { it.code == 0 }
-                    val udpDto = gson.fromJson(message, UdpDto::class.java)
-
-                    udpDto.ip
-                }
-            }.getOrThrow()
-        }
-
-    private fun connectToServerAsync(ip: String) =
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                Socket(ip, PORT_SERVER).apply {
-                    socket = this
-                    input = BufferedReader(InputStreamReader(getInputStream()))
-                    output = PrintWriter(OutputStreamWriter(getOutputStream()))
-                }
-            }.onFailure {action -> throw action }
+                }.onFailure { throwable -> throw throwable }
+            }
         }
 
 
-    private fun getUserIdAsync(input: BufferedReader) =
-        viewModelScope.async(Dispatchers.IO) {
-            runCatching {
-                gson.fromJson(
+    private suspend fun getUserIdAsync(input: BufferedReader) =
+        coroutineScope {
+            async(Dispatchers.IO) {
+                runCatching {
                     gson.fromJson(
-                        input.readLine(),
-                        BaseDto::class.java
-                    ).payload,
-                    ConnectedDto::class.java
-                ).id
-            }.getOrThrow()
+                        gson.fromJson(
+                            input.readLine(),
+                            BaseDto::class.java
+                        ).payload,
+                        ConnectedDto::class.java
+                    ).id
+                }.getOrThrow()
+            }
         }
 
-    private fun connectUserAsync(output: PrintWriter, userId: String, userName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            runCatching {
-                output.println(
-                    gson.toJson(
-                        BaseDto(
-                            BaseDto.Action.CONNECT,
-                            gson.toJson(
-                                ConnectDto(
-                                    userId,
-                                    userName
+
+    private suspend fun connectUser(output: PrintWriter, userId: String, userName: String) {
+        coroutineScope {
+            launch(Dispatchers.IO) {
+                runCatching {
+                    output.println(
+                        gson.toJson(
+                            BaseDto(
+                                BaseDto.Action.CONNECT,
+                                gson.toJson(
+                                    ConnectDto(
+                                        userId,
+                                        userName
+                                    )
                                 )
                             )
                         )
                     )
+                }.exceptionOrNull()
+            }
+        }
+    }
+
+    private fun startPings(output: PrintWriter, userId: String) {
+        thread(start = true) {
+            while (true) {
+                val pingMessage = gson.toJson(
+                    BaseDto(
+                        BaseDto.Action.PING,
+                        gson.toJson(PingDto(userId))
+                    )
                 )
-            }.exceptionOrNull()
+                output.println(pingMessage)
+                output.flush()
+                Thread.sleep(5000)
+            }
         }
     }
 
@@ -160,7 +183,7 @@ class AuthorizationViewModel @Inject constructor(
         const val PORT_BROADCAST = 8888
         const val PORT_SERVER = 6666
 
-        const val TIMEOUT_BROADCAST = 3000L
+        const val TIMEOUT_BROADCAST = 5000L
         const val TIMEOUT_CONNECT_SERVER = 5000L
         const val TIMEOUT_GET_UID = 3000L
     }

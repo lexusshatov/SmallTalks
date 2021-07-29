@@ -1,9 +1,13 @@
 package com.example.smalltalks.view.base
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import com.example.smalltalks.R
 import com.example.smalltalks.view.authorization.AuthorizationFragment
+import com.example.smalltalks.view.authorization.AuthorizationFragment.Companion.USER_NAME
+import com.example.smalltalks.view.authorization.AuthorizationFragment.Companion.USER_PREFERENCES
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -16,5 +20,20 @@ class HostActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.frame_container, AuthorizationFragment.newInstance())
             .commit()
+    }
+
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount == CHAT_FRAGMENT_ENTRY_COUNT) {
+            getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE)
+                .edit {
+                    remove(USER_NAME)
+                    apply()
+                }
+        }
+        super.onBackPressed()
+    }
+
+    companion object {
+        const val CHAT_FRAGMENT_ENTRY_COUNT = 1
     }
 }
