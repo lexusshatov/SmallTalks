@@ -27,26 +27,25 @@ import javax.inject.Inject
 class AuthorizationViewModel @Inject constructor(
     private val gson: Gson
 ) : BaseViewModel() {
+    private lateinit var socket: Socket
+    private lateinit var input: BufferedReader
+    private lateinit var output: PrintWriter
 
     private val mutableData = MutableLiveData<Boolean>()
     override val data: LiveData<Boolean>
         get() = mutableData
 
-    fun connect(userName: String) {
-        viewModelScope.launch(Dispatchers.Main) {
+    fun connect(userName: String) =
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val ip = withTimeout(TIMEOUT_BROADCAST) { getServerIpAsync().await() }
-                    .getOrThrow()
                 Log.d(TAG, "Server IP: $ip")
 
-                val socket = withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServerAsync(ip).await() }
-                    .getOrThrow()
-                Log.d(TAG, "test")
-                val input = BufferedReader(InputStreamReader(socket.getInputStream()))
-                val output = PrintWriter(OutputStreamWriter(socket.getOutputStream()))
+                //init socket, in/out streams
+                withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServerAsync(ip).join() }
+                Log.d(TAG, "Connected")
 
                 val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
-                    .getOrThrow()
                 Log.d(TAG, "User ID: $userId")
 
                 connectUserAsync(output, userId, userName)
@@ -54,12 +53,19 @@ class AuthorizationViewModel @Inject constructor(
             } catch (e: Exception) {
                 mutableData.postValue(false)
                 e.printStackTrace()
+            } finally {
+                try {
+                    input.close()
+                    output.close()
+                    socket.close()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
-    }
 
     private fun getServerIpAsync() =
-        GlobalScope.async {
+        viewModelScope.async(Dispatchers.IO) {
             runCatching {
                 if (isEmulator()) EMULATOR_IP
                 else {
@@ -80,19 +86,23 @@ class AuthorizationViewModel @Inject constructor(
 
                     udpDto.ip
                 }
-            }
-    }
+            }.getOrThrow()
+        }
 
     private fun connectToServerAsync(ip: String) =
-        GlobalScope.async {
+        viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                Socket(ip, PORT_SERVER)
-            }
+                Socket(ip, PORT_SERVER).apply {
+                    socket = this
+                    input = BufferedReader(InputStreamReader(getInputStream()))
+                    output = PrintWriter(OutputStreamWriter(getOutputStream()))
+                }
+            }.onFailure {action -> throw action }
         }
 
 
     private fun getUserIdAsync(input: BufferedReader) =
-        GlobalScope.async {
+        viewModelScope.async(Dispatchers.IO) {
             runCatching {
                 gson.fromJson(
                     gson.fromJson(
@@ -101,11 +111,11 @@ class AuthorizationViewModel @Inject constructor(
                     ).payload,
                     ConnectedDto::class.java
                 ).id
-            }
+            }.getOrThrow()
         }
 
     private fun connectUserAsync(output: PrintWriter, userId: String, userName: String) {
-        GlobalScope.async {
+        viewModelScope.launch(Dispatchers.IO) {
             runCatching {
                 output.println(
                     gson.toJson(
@@ -120,7 +130,7 @@ class AuthorizationViewModel @Inject constructor(
                         )
                     )
                 )
-            }
+            }.exceptionOrNull()
         }
     }
 
