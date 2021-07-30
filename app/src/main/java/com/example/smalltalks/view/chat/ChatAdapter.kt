@@ -48,8 +48,6 @@ class ChatAdapter : ListAdapter<MessageDto, ChatAdapter.ViewHolder>(UserDiffCall
     }
 
     fun add(messageDto: MessageDto) {
-        if (!currentList.contains(messageDto)) {
-            submitList(currentList + messageDto)
-        }
+        submitList(currentList + messageDto)
     }
 }

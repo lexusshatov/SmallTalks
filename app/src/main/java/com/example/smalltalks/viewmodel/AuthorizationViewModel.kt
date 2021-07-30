@@ -25,8 +25,8 @@ class AuthorizationViewModel @Inject constructor(
     private val gson: Gson
 ) : BaseViewModel() {
     private lateinit var socket: Socket
-    private lateinit var input: BufferedReader
-    private lateinit var output: PrintWriter
+    lateinit var input: BufferedReader
+    lateinit var output: PrintWriter
 
     private val backgroundScope = CoroutineScope(Dispatchers.IO)
 
@@ -34,40 +34,31 @@ class AuthorizationViewModel @Inject constructor(
     override val data: LiveData<Boolean>
         get() = mutableData
 
+    lateinit var user: User
+
     fun connect(userName: String) {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.IO) {
             runCatching {
+                // FIXME: 30.07.2021  
                 val ip = withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
-
-                Log.d(TAG, "Server IP: $ip")
-
                 //init socket, in/out streams
-                withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServerAsync(ip).join() }
-                Log.d(TAG, "Connected")
-
+                withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServer(ip).join() }
                 val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
-                Log.d(TAG, "User ID: $userId")
-
+                user = User(userId, userName)
                 connectUser(output, userId, userName)
                 startPings(output, userId)
             }
                 .onSuccess { mutableData.postValue(true) }
-                .onFailure { throwable ->
-                    Log.e(TAG, "Connect failed", throwable)
+                .onFailure {
+                    Log.e(TAG, it.toString())
                     mutableData.postValue(false)
-                    runCatching {
-                        withContext(NonCancellable) {
-                            input.close()
-                            output.close()
-                            socket.close()
-                        }
-                    }.onFailure { Log.e(TAG, "Freeing resources failed", it) }
+                    freeingResources()
                 }
         }
     }
 
     private fun getServerAddressAsync() =
-        backgroundScope.async {
+        backgroundScope.async(Dispatchers.IO) {
             runCatching {
                 if (isEmulator()) EMULATOR_IP
                 else {
@@ -88,74 +79,67 @@ class AuthorizationViewModel @Inject constructor(
 
                     udpDto.ip
                 }
-            }.getOrThrow()
-        }
-
-
-    private suspend fun connectToServerAsync(ip: String) =
-        coroutineScope {
-            launch(Dispatchers.IO) {
-                runCatching {
-                    Socket(ip, PORT_SERVER).apply {
-                        socket = this
-                        input = BufferedReader(InputStreamReader(getInputStream()))
-                        output = PrintWriter(OutputStreamWriter(getOutputStream()))
-                    }
-                }.onFailure { throwable -> throw throwable }
             }
+                .onSuccess { ip -> Log.d(TAG, "Server IP: $ip") }
+                .onFailure { throwable -> Log.e(TAG, "Failed to get server address", throwable) }
+                .getOrThrow()
         }
 
-
-    private suspend fun getUserIdAsync(input: BufferedReader) =
-        coroutineScope {
-            async(Dispatchers.IO) {
-                runCatching {
-                    gson.fromJson(
-                        gson.fromJson(
-                            input.readLine(),
-                            BaseDto::class.java
-                        ).payload,
-                        ConnectedDto::class.java
-                    ).id
-                }.getOrThrow()
+    private fun connectToServer(ip: String) =
+        backgroundScope.launch(Dispatchers.IO) {
+            runCatching {
+                Socket(ip, PORT_SERVER).apply {
+                    socket = this
+                    input = BufferedReader(InputStreamReader(getInputStream()))
+                    output = PrintWriter(OutputStreamWriter(getOutputStream()))
+                }
             }
+                .onSuccess { Log.d(TAG, "Connected") }
+                .onFailure { throwable -> Log.e(TAG, "Connect to server failed", throwable) }
         }
 
+    private fun getUserIdAsync(input: BufferedReader) =
+        backgroundScope.async(Dispatchers.IO) {
+            runCatching {
+                val baseDto = gson.fromJson(input.readLine(), BaseDto::class.java)
+                val connectedDto = gson.fromJson(baseDto.payload, ConnectedDto::class.java)
+                connectedDto.id
+            }
+                .onSuccess { userId -> Log.d(TAG, "User ID: $userId") }
+                .onFailure { throwable -> Log.e(TAG, "Failed to get user id", throwable) }
+                .getOrThrow()
+        }
 
-    private suspend fun connectUser(output: PrintWriter, userId: String, userName: String) {
-        coroutineScope {
-            launch(Dispatchers.IO) {
-                runCatching {
-                    output.println(
-                        gson.toJson(
-                            BaseDto(
-                                BaseDto.Action.CONNECT,
-                                gson.toJson(
-                                    ConnectDto(
-                                        userId,
-                                        userName
-                                    )
-                                )
-                            )
-                        )
-                    )
-                }.exceptionOrNull()
+    private fun connectUser(output: PrintWriter, userId: String, userName: String) {
+        backgroundScope.launch(Dispatchers.IO) {
+            runCatching {
+                val connectDto = ConnectDto(userId, userName)
+                val baseDto = BaseDto(BaseDto.Action.CONNECT, gson.toJson(connectDto))
+                output.println(gson.toJson(baseDto))
+            }
+                .onSuccess { Log.d(TAG, "Sent user connect") }
+                .onFailure { throwable -> Log.e(TAG, "User connecting failed", throwable) }
+        }
+    }
+
+    private suspend fun startPings(output: PrintWriter, userId: String) {
+        backgroundScope.launch(Dispatchers.IO) {
+            val baseDto = BaseDto(BaseDto.Action.PING, gson.toJson(PingDto(userId)))
+            val pingMessage = gson.toJson(baseDto)
+            while (true) {
+                output.println(pingMessage)
+                output.flush()
+                delay(5000)
             }
         }
     }
 
-    private fun startPings(output: PrintWriter, userId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            while (true) {
-                val pingMessage = gson.toJson(
-                    BaseDto(
-                        BaseDto.Action.PING,
-                        gson.toJson(PingDto(userId))
-                    )
-                )
-                output.println(pingMessage)
-                output.flush()
-                delay(5000)
+    private suspend fun freeingResources() {
+        runCatching {
+            withContext(NonCancellable) {
+                input.close()
+                output.close()
+                socket.close()
             }
         }
     }
@@ -186,13 +170,16 @@ class AuthorizationViewModel @Inject constructor(
         const val PORT_BROADCAST = 8888
         const val PORT_SERVER = 6666
 
-        const val TIMEOUT_BROADCAST = 2000L
+        const val TIMEOUT_BROADCAST = 5000L
         const val TIMEOUT_CONNECT_SERVER = 5000L
-        const val TIMEOUT_GET_UID = 3000L
+        const val TIMEOUT_GET_UID = 5000L
     }
 
     override fun onCleared() {
         super.onCleared()
+        backgroundScope.launch {
+            freeingResources()
+        }
         backgroundScope.cancel()
     }
 }

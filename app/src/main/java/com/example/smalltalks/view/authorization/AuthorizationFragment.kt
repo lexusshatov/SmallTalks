@@ -60,7 +60,14 @@ class AuthorizationFragment :
     private fun navigateToChat() {
         requireActivity().supportFragmentManager
             .beginTransaction()
-            .replace(R.id.frame_container, ChatFragment.newInstance())
+            .replace(
+                R.id.frame_container,
+                ChatFragment.newInstance(
+                    viewModel.input,
+                    viewModel.output,
+                    viewModel.user
+                )
+            )
             .addToBackStack(null)
             .commit()
     }

@@ -1,4 +1,4 @@
-package com.example.smalltalks
+package com.example.smalltalks.socket
 
 import com.example.smalltalks.model.remote_protocol.*
 import com.google.gson.Gson
@@ -12,9 +12,9 @@ import java.net.InetAddress
 import java.net.Socket
 import kotlin.concurrent.thread
 
-const val HOST = "255.255.255.255"
-const val PORT_BROADCAST = 8888
-const val PORT_SERVER = 6666
+private const val HOST = "255.255.255.255"
+private const val PORT_BROADCAST = 8888
+private const val PORT_SERVER = 6666
 
 fun main() {
     val gson = Gson()
@@ -53,21 +53,34 @@ fun main() {
     output.flush()
 
 
-    thread(start = true) {
-        println("start ping")
-        while (true) {
-            val ping = PingDto(connectedDto.id)
-            val message = gson.toJson(BaseDto(BaseDto.Action.PING, payload = gson.toJson(ping)))
-            output.println(message)
-            output.flush()
-            Thread.sleep(5000)
-        }
-    }
-
     //get users
     val getUsersDto = GetUsersDto(connectedDto.id)
     val baseGetUsersDto = BaseDto(BaseDto.Action.GET_USERS, gson.toJson(getUsersDto))
     output.println(gson.toJson(baseGetUsersDto))
     output.flush()
-    println(input.readLine())
+    val usersDto = input.readLine().apply { println(this) }
+    val baseUsersReceivedDto = gson.fromJson( usersDto, BaseDto::class.java)
+    val usersReceivedDto = gson.fromJson(baseUsersReceivedDto.payload, UsersReceivedDto::class.java)
+
+    //send message
+    val sendMessageDto = SendMessageDto(connectedDto.id, "8486d8a4-0674-48b6-a18a-8cee636e963c", "Hello")
+    val baseSendMessageDto = BaseDto(BaseDto.Action.SEND_MESSAGE, gson.toJson(sendMessageDto))
+    output.println(gson.toJson(baseSendMessageDto))
+    output.flush()
+
+    //get message
+    val baseMessageDto = gson.fromJson(input.readLine(), BaseDto::class.java)
+    val messageDto = gson.fromJson(baseMessageDto.payload, MessageDto::class.java)
+    println(messageDto.message)
+
+    thread(start = true) {
+        println("start ping")
+        while (true) {
+            val ping = PingDto(connectedDto.id)
+            val message = gson.toJson(BaseDto(BaseDto.Action.PING, gson.toJson(ping)))
+            output.println(message)
+            output.flush()
+            Thread.sleep(5000)
+        }
+    }
 }
