@@ -28,6 +28,8 @@ class AuthorizationViewModel @Inject constructor(
     private lateinit var input: BufferedReader
     private lateinit var output: PrintWriter
 
+    private val backgroundScope = CoroutineScope(Dispatchers.IO)
+
     private val mutableData = MutableLiveData<Boolean>()
     override val data: LiveData<Boolean>
         get() = mutableData
@@ -36,6 +38,7 @@ class AuthorizationViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Main) {
             runCatching {
                 val ip = withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
+
                 Log.d(TAG, "Server IP: $ip")
 
                 //init socket, in/out streams
@@ -53,40 +56,41 @@ class AuthorizationViewModel @Inject constructor(
                     Log.e(TAG, "Connect failed", throwable)
                     mutableData.postValue(false)
                     runCatching {
-                        input.close()
-                        output.close()
-                        socket.close()
+                        withContext(NonCancellable) {
+                            input.close()
+                            output.close()
+                            socket.close()
+                        }
                     }.onFailure { Log.e(TAG, "Freeing resources failed", it) }
                 }
         }
     }
 
-    private suspend fun getServerAddressAsync() =
-        coroutineScope {
-            async(Dispatchers.IO) {
-                runCatching {
-                    if (isEmulator()) EMULATOR_IP
-                    else {
-                        val buffer = ByteArray(100)
-                        val packet = DatagramPacket(
-                            buffer,
-                            buffer.size,
-                            InetAddress.getByName(HOST_BROADCAST),
-                            PORT_BROADCAST
-                        )
-                        DatagramSocket().apply {
-                            send(packet)
-                            receive(packet)
-                            close()
-                        }
-                        val message = String(packet.data).trim { it.code == 0 }
-                        val udpDto = gson.fromJson(message, UdpDto::class.java)
-
-                        udpDto.ip
+    private fun getServerAddressAsync() =
+        backgroundScope.async {
+            runCatching {
+                if (isEmulator()) EMULATOR_IP
+                else {
+                    val buffer = ByteArray(100)
+                    val packet = DatagramPacket(
+                        buffer,
+                        buffer.size,
+                        InetAddress.getByName(HOST_BROADCAST),
+                        PORT_BROADCAST
+                    )
+                    DatagramSocket().apply {
+                        send(packet)
+                        receive(packet)
+                        close()
                     }
-                }.getOrThrow()
-            }
+                    val message = String(packet.data).trim { it.code == 0 }
+                    val udpDto = gson.fromJson(message, UdpDto::class.java)
+
+                    udpDto.ip
+                }
+            }.getOrThrow()
         }
+
 
     private suspend fun connectToServerAsync(ip: String) =
         coroutineScope {
@@ -182,8 +186,13 @@ class AuthorizationViewModel @Inject constructor(
         const val PORT_BROADCAST = 8888
         const val PORT_SERVER = 6666
 
-        const val TIMEOUT_BROADCAST = 5000L
+        const val TIMEOUT_BROADCAST = 2000L
         const val TIMEOUT_CONNECT_SERVER = 5000L
         const val TIMEOUT_GET_UID = 3000L
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        backgroundScope.cancel()
     }
 }
