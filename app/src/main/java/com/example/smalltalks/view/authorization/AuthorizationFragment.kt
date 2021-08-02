@@ -11,7 +11,7 @@ import androidx.fragment.app.viewModels
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentAuthorizationBinding
 import com.example.smalltalks.view.base.BaseFragment
-import com.example.smalltalks.view.chat.ChatFragment
+import com.example.smalltalks.view.user_list.UserListFragment
 import com.example.smalltalks.viewmodel.AuthorizationViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -32,7 +32,10 @@ class AuthorizationFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        userName?.let { viewModel.connect(it) }
+        userName?.let {
+            binding.editTextTextPersonName.setText(it)
+            viewModel.connect(it)
+        }
 
         binding.buttonLogin.setOnClickListener {
             val userName = binding.editTextTextPersonName.text.toString()
@@ -50,23 +53,19 @@ class AuthorizationFragment :
 
         viewModel.data.observe(viewLifecycleOwner, {
             if (it) {
-                navigateToChat()
+                navigateToUsers()
             } else {
                 showToast("Error on connecting")
             }
         })
     }
 
-    private fun navigateToChat() {
+    private fun navigateToUsers() {
         requireActivity().supportFragmentManager
             .beginTransaction()
             .replace(
                 R.id.frame_container,
-                ChatFragment.newInstance(
-                    viewModel.input,
-                    viewModel.output,
-                    viewModel.user
-                )
+                UserListFragment()
             )
             .addToBackStack(null)
             .commit()
@@ -75,8 +74,6 @@ class AuthorizationFragment :
     companion object {
         const val USER_PREFERENCES = "User_preferences"
         const val USER_NAME = "User_name"
-
-        fun newInstance() = AuthorizationFragment()
     }
 
     private fun showToast(message: String) {

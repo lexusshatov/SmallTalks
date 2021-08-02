@@ -2,7 +2,8 @@
     <string name="app_name">SmallTalks</string>
     <string name="authorization_login_edit_hint">Username</string>
     <string name="authorization_login_button_text">Login</string>
-    <string name="action_bar_user_list">User list</string>
+    <string name="action_bar_user_list">Back</string>
     <string name="send">Send</string>
     <string name="message">Message</string>
+    <string name="send_message_button">Send message button</string>
 </resources>

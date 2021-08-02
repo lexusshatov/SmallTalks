@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 @AndroidEntryPoint
 class HostActivity : AppCompatActivity() {
     private var clickCount = 0
@@ -25,7 +24,7 @@ class HostActivity : AppCompatActivity() {
         setContentView(R.layout.activity_host)
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.frame_container, AuthorizationFragment.newInstance())
+            .replace(R.id.frame_container, AuthorizationFragment())
             .commit()
 
         lifecycleScope.launch(Dispatchers.IO) {
