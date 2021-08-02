@@ -32,7 +32,7 @@ class ChatAdapter : ListAdapter<MessageDto, ChatAdapter.ViewHolder>(UserDiffCall
         fun bind(messageDto: MessageDto) {
             binding.apply {
                 chatUserName.text = messageDto.from.name
-                chatMessageContainer.text = messageDto.message
+                chatMessage.text = messageDto.message
             }
         }
     }

@@ -1,29 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:id="@+id/chat_item_container"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="10dp"
-    android:layout_marginTop="15dp"
-    android:layout_marginEnd="10dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginHorizontal="10dp"
     android:layout_marginBottom="15dp"
-    android:background="@color/gray"
+    android:background="@drawable/rounded_message_corner"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/chat_user_name"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="10dp"
+        android:background="@drawable/rounded_username_corner"
+        android:paddingStart="12dp"
         android:paddingEnd="10dp"
+        android:text="User name"
+        android:textColor="@color/black"
         android:textSize="15sp" />
 
     <TextView
-        android:id="@+id/chat_message_container"
-        android:layout_width="match_parent"
+        android:id="@+id/chat_message"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingHorizontal="10dp"
+        android:text="losadsadsassage"
         android:textSize="25sp">
 
     </TextView>
