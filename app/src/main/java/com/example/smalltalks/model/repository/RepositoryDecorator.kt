@@ -29,6 +29,7 @@ class RepositoryDecorator @Inject constructor(
     @ExperimentalCoroutinesApi
     override val messages: Flow<MessageItem>
         get() {
+            println(localRepository.getMessages())
             val localFlow = localRepository.getMessages().asFlow()
             val remoteFlow = socketRepository.messages
             return merge(localFlow, remoteFlow)
