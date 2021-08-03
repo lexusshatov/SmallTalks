@@ -1,4 +1,4 @@
-package com.example.smalltalks.model.repository
+package com.example.smalltalks.model.repository.remote
 
 import androidx.lifecycle.LiveData
 

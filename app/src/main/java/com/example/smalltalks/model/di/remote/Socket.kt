@@ -1,7 +1,7 @@
-package com.example.smalltalks.model.di
+package com.example.smalltalks.model.di.remote
 
 import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class Address()
+annotation class Socket

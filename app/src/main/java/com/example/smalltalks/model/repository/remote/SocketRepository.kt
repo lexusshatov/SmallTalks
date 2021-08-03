@@ -1,10 +1,12 @@
-package com.example.smalltalks.model.repository
+package com.example.smalltalks.model.repository.remote
 
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.smalltalks.model.remote_protocol.*
+import com.example.smalltalks.model.repository.DataRepository
+import com.example.smalltalks.view.chat.MessageItem
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,19 +23,20 @@ import javax.inject.Inject
 
 class SocketRepository @Inject constructor(
     private val gson: Gson
-): AuthorizationContract, ChatContract, UserListContract {
+) : AuthorizationContract, ChatContract, UserListContract {
     private lateinit var socket: Socket
     private lateinit var input: BufferedReader
     private lateinit var output: PrintWriter
 
-    private val backgroundScope = CoroutineScope(Dispatchers.IO)
+    private var timeoutPong = 15000L
+
+    private val backgroundScope = CoroutineScope(Dispatchers.IO) + SupervisorJob()
 
     override lateinit var me: User
 
-    private val mutableMessages = MutableSharedFlow<MessageDto>()
-    override val messages: SharedFlow<MessageDto>
+    private val mutableMessages = MutableSharedFlow<MessageItem>()
+    override val messages: SharedFlow<MessageItem>
         get() = mutableMessages
-
 
     private val mutableUsers by lazy {
         backgroundScope.launch(Dispatchers.IO) {
@@ -58,7 +61,8 @@ class SocketRepository @Inject constructor(
         GlobalScope.launch(Dispatchers.IO) {
             runCatching {
                 // FIXME: 30.07.2021
-                val ip = withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
+                val ip =
+                    "192.168.88.26"//withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
                 //init socket, in/out streams
                 withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServer(ip).join() }
                 val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
@@ -79,6 +83,15 @@ class SocketRepository @Inject constructor(
 
     private fun startListening(input: BufferedReader) {
         backgroundScope.launch(Dispatchers.IO) {
+            while (timeoutPong > 0) {
+                val delayTime = 1000L
+                delay(delayTime)
+                timeoutPong -= delayTime
+            }
+            disconnect()
+            connect(me.name)
+        }
+        backgroundScope.launch(Dispatchers.IO) {
             runCatching {
                 while (true) {
                     val baseDto = gson.fromJson(input.readLine(), BaseDto::class.java)
@@ -86,15 +99,16 @@ class SocketRepository @Inject constructor(
                         BaseDto.Action.NEW_MESSAGE -> {
                             val newMessageDto =
                                 gson.fromJson(baseDto.payload, MessageDto::class.java)
-                            mutableMessages.emit(newMessageDto)
+                            val messageItem = MessageItem(newMessageDto, false)
+                            mutableMessages.emit(messageItem)
                         }
                         BaseDto.Action.USERS_RECEIVED -> {
                             val usersReceivedDto =
                                 gson.fromJson(baseDto.payload, UsersReceivedDto::class.java)
                             mutableUsers.postValue(usersReceivedDto.users)
-                            Log.d(TAG, baseDto.toString())
                         }
-                        else -> {/*TODO*/
+                        BaseDto.Action.PONG -> {
+                            timeoutPong = 15000L
                         }
                     }
                 }
@@ -222,6 +236,15 @@ class SocketRepository @Inject constructor(
                 || Build.PRODUCT.contains("vbox86p")
                 || Build.PRODUCT.contains("emulator")
                 || Build.PRODUCT.contains("simulator"))
+    }
+
+    fun disconnect() {
+        backgroundScope.launch(Dispatchers.IO) {
+            runCatching {
+                freeingResources()
+            }.getOrNull()
+            backgroundScope.cancel()
+        }
     }
 
     private companion object {

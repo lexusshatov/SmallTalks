@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.example.smalltalks.R
+import com.example.smalltalks.model.repository.local.LocalRepository
+import com.example.smalltalks.model.repository.remote.SocketRepository
 import com.example.smalltalks.view.authorization.AuthorizationFragment
 import com.example.smalltalks.view.authorization.AuthorizationFragment.Companion.USER_NAME
 import com.example.smalltalks.view.authorization.AuthorizationFragment.Companion.USER_PREFERENCES
@@ -14,10 +16,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HostActivity : AppCompatActivity() {
     private var clickCount = 0
+    @Inject lateinit var socketRepository: SocketRepository
+    @Inject lateinit var localRepository: LocalRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +51,7 @@ class HostActivity : AppCompatActivity() {
                             remove(USER_NAME)
                             apply()
                         }
+                    socketRepository.disconnect()
                     finish()
                     startActivity(intent)
                 }

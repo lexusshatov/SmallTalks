@@ -1,16 +1,16 @@
 package com.example.smalltalks.view.chat
 
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smalltalks.databinding.ChatItemBinding
 
-class ChatAdapter : ListAdapter<MessageItem, ChatAdapter.ViewHolder>(UserDiffCallback()) {
+class ChatAdapter(messageList: List<MessageItem> = emptyList()) : ListAdapter<MessageItem, ChatAdapter.ViewHolder>(UserDiffCallback()) {
+    init {
+        submitList(messageList)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ChatItemBinding.inflate(
@@ -35,9 +35,6 @@ class ChatAdapter : ListAdapter<MessageItem, ChatAdapter.ViewHolder>(UserDiffCal
             binding.apply {
                 if (messageItem.fromMe) {
                     //TODO set gravity layout to end
-                    chatItemContainer.updateLayoutParams<LinearLayout.LayoutParams> {
-                        gravity = Gravity.END
-                    }
                 }
                 chatUserName.text = messageItem.messageDto.from.name
                 chatMessage.text = messageItem.messageDto.message

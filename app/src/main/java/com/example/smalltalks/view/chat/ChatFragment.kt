@@ -2,6 +2,7 @@ package com.example.smalltalks.view.chat
 
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +13,9 @@ import com.example.smalltalks.model.remote_protocol.User
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.viewmodel.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class ChatFragment(
@@ -30,16 +33,23 @@ class ChatFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = receiver.name
+
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = this@ChatFragment.adapter
         }
 
+        // FIXME: 03.08.2021  
+        viewModel
         lifecycleScope.launchWhenResumed {
-            viewModel.data.collect {
-                adapter.add(
-                    MessageItem(it, false)
-                )
+            withContext(Dispatchers.IO) {
+                viewModel.data.collect {
+                    withContext(Dispatchers.Main) {
+                        adapter.add(it)
+                    }
+                    if (!it.fromMe) viewModel.saveMessage(it)
+                }
             }
         }
 
@@ -47,11 +57,11 @@ class ChatFragment(
             val message = binding.editMessage.text.toString()
             if (message.isNotEmpty()) {
                 viewModel.sendMessage(receiver.id, message)
-                adapter.add(
-                    MessageItem(
-                        MessageDto(viewModel.me, message), true
-                    )
+                val messageItem = MessageItem(
+                    MessageDto(viewModel.me, message), true
                 )
+                adapter.add(messageItem)
+                viewModel.saveMessage(messageItem)
             }
         }
     }

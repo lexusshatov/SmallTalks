@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.fragment.app.viewModels
 import com.example.smalltalks.R
@@ -32,26 +33,34 @@ class AuthorizationFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (requireActivity() as AppCompatActivity).supportActionBar?.title = "Login"
+
         userName?.let {
+            binding.buttonLogin.isClickable = false
             binding.editTextTextPersonName.setText(it)
             viewModel.connect(it)
         }
 
-        binding.buttonLogin.setOnClickListener {
-            val userName = binding.editTextTextPersonName.text.toString()
-            if (userName.isNotEmpty()) {
-                requireActivity().getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE)
-                    .edit {
-                        putString(USER_NAME, userName)
-                        apply()
-                    }
-                viewModel.connect(userName)
-            } else {
-                showToast("Username must be not empty")
+        binding.apply {
+            buttonLogin.setOnClickListener {
+                buttonLogin.isClickable = false
+                val userName = editTextTextPersonName.text.toString()
+                if (userName.isNotEmpty()) {
+                    requireActivity().getSharedPreferences(USER_PREFERENCES, Context.MODE_PRIVATE)
+                        .edit {
+                            putString(USER_NAME, userName)
+                            apply()
+                        }
+                    viewModel.connect(userName)
+                } else {
+                    showToast("Username must be not empty")
+                    buttonLogin.isClickable = true
+                }
             }
         }
 
         viewModel.data.observe(viewLifecycleOwner, {
+            binding.buttonLogin.isClickable = true
             if (it) {
                 navigateToUsers()
             } else {
