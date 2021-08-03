@@ -33,7 +33,6 @@
         android:layout_marginBottom="16dp"
         android:background="@color/blue"
         android:contentDescription="@string/send_message_button"
-        android:src="@drawable/ic_baseline_send_24"
         android:text="@string/send"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

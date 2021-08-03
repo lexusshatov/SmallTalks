@@ -4,6 +4,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -33,8 +34,8 @@ class ChatAdapter : ListAdapter<MessageItem, ChatAdapter.ViewHolder>(UserDiffCal
         fun bind(messageItem: MessageItem) {
             binding.apply {
                 if (messageItem.fromMe) {
-                        //TODO set gravity layout to end
-                    (root.layoutParams as LinearLayout.LayoutParams).apply {
+                    //TODO set gravity layout to end
+                    chatItemContainer.updateLayoutParams<LinearLayout.LayoutParams> {
                         gravity = Gravity.END
                     }
                 }
