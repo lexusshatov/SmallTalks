@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.smalltalks.model.remote_protocol.*
-import com.example.smalltalks.model.repository.DataRepository
 import com.example.smalltalks.view.chat.MessageItem
 import com.google.gson.Gson
 import kotlinx.coroutines.*
@@ -21,9 +20,9 @@ import java.net.InetAddress
 import java.net.Socket
 import javax.inject.Inject
 
-class SocketRepository @Inject constructor(
+class SocketRemote @Inject constructor(
     private val gson: Gson
-) : AuthorizationContract, ChatContract, UserListContract {
+) : RemoteData {
     private lateinit var socket: Socket
     private lateinit var input: BufferedReader
     private lateinit var output: PrintWriter
@@ -248,7 +247,7 @@ class SocketRepository @Inject constructor(
     }
 
     private companion object {
-        val TAG: String = SocketRepository::class.java.simpleName
+        val TAG: String = SocketRemote::class.java.simpleName
         const val EMULATOR_IP = "10.0.2.2"
         const val HOST_BROADCAST = "255.255.255.255"
         const val PORT_BROADCAST = 8888

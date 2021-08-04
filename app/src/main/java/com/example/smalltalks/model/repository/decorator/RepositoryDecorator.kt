@@ -1,20 +1,18 @@
-package com.example.smalltalks.model.repository
+package com.example.smalltalks.model.repository.decorator
 
 import com.example.smalltalks.model.di.remote.Socket
 import com.example.smalltalks.model.repository.local.LocalRepository
-import com.example.smalltalks.model.repository.remote.LocalChatContract
-import com.example.smalltalks.model.repository.remote.SocketRepository
+import com.example.smalltalks.model.repository.remote.SocketRemote
 import com.example.smalltalks.view.chat.MessageItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.merge
 import javax.inject.Inject
 
 class RepositoryDecorator @Inject constructor(
     private val localRepository: LocalRepository,
-    @Socket private val socketRepository: SocketRepository
-) : DataRepository, LocalChatContract {
+    @Socket private val socketRepository: SocketRemote
+) : DataRepository {
     override val connect
         get() = socketRepository.connect
     override val me
@@ -29,7 +27,6 @@ class RepositoryDecorator @Inject constructor(
     @ExperimentalCoroutinesApi
     override val messages: Flow<MessageItem>
         get() {
-            println(localRepository.getMessages())
             val localFlow = localRepository.getMessages().asFlow()
             val remoteFlow = socketRepository.messages
             return merge(localFlow, remoteFlow)
@@ -38,7 +35,9 @@ class RepositoryDecorator @Inject constructor(
     override fun sendMessage(to: String, message: String) =
         socketRepository.sendMessage(to, message)
 
+    override fun getMessages() = localRepository.getMessages()
+
     override fun saveMessage(messageItem: MessageItem) {
-        localRepository.addMessage(messageItem)
+        localRepository.saveMessage(messageItem)
     }
 }

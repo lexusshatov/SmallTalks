@@ -1,7 +1,7 @@
 package com.example.smalltalks.viewmodel
 
-import com.example.smalltalks.model.di.Decorator
-import com.example.smalltalks.model.repository.remote.AuthorizationContract
+import com.example.smalltalks.model.di.decorator.Decorator
+import com.example.smalltalks.model.repository.AuthorizationContract
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

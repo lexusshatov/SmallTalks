@@ -1,9 +1,8 @@
 package com.example.smalltalks.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.example.smalltalks.model.di.Decorator
-import com.example.smalltalks.model.repository.remote.ChatContract
-import com.example.smalltalks.model.repository.remote.LocalChatContract
+import com.example.smalltalks.model.di.decorator.Decorator
+import com.example.smalltalks.model.repository.decorator.DataRepository
 import com.example.smalltalks.view.chat.MessageItem
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    @Decorator private val repository: LocalChatContract,
+    @Decorator private val repository: DataRepository,
 ) : BaseViewModel() {
 
     val me = repository.me
@@ -27,6 +26,8 @@ class ChatViewModel @Inject constructor(
     }
 
     fun sendMessage(to: String, message: String) {
-        repository.sendMessage(to, message)
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.sendMessage(to, message)
+        }
     }
 }

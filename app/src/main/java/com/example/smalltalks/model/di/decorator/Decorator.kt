@@ -1,4 +1,4 @@
-package com.example.smalltalks.model.di
+package com.example.smalltalks.model.di.decorator
 
 import javax.inject.Qualifier
 

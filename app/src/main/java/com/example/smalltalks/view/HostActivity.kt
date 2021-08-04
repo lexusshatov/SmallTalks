@@ -8,7 +8,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.example.smalltalks.R
 import com.example.smalltalks.model.repository.local.LocalRepository
-import com.example.smalltalks.model.repository.remote.SocketRepository
+import com.example.smalltalks.model.repository.remote.SocketRemote
 import com.example.smalltalks.view.authorization.AuthorizationFragment
 import com.example.smalltalks.view.authorization.AuthorizationFragment.Companion.USER_NAME
 import com.example.smalltalks.view.authorization.AuthorizationFragment.Companion.USER_PREFERENCES
@@ -21,7 +21,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class HostActivity : AppCompatActivity() {
     private var clickCount = 0
-    @Inject lateinit var socketRepository: SocketRepository
+    @Inject lateinit var socketRepository: SocketRemote
     @Inject lateinit var localRepository: LocalRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {

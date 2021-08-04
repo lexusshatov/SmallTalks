@@ -1,6 +1,6 @@
 package com.example.smalltalks.model.di.remote
 
-import com.example.smalltalks.model.repository.remote.SocketRepository
+import com.example.smalltalks.model.repository.remote.SocketRemote
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -15,5 +15,5 @@ object SocketRepositoryModule {
     @Socket
     @Provides
     @ActivityRetainedScoped
-    fun provideSocketRepository(gson: Gson) = SocketRepository(gson)
+    fun provideSocketRepository(gson: Gson) = SocketRemote(gson)
 }

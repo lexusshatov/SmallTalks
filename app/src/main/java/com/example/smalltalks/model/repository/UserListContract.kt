@@ -1,4 +1,4 @@
-package com.example.smalltalks.model.repository.remote
+package com.example.smalltalks.model.repository
 
 import androidx.lifecycle.LiveData
 import com.example.smalltalks.model.remote_protocol.User

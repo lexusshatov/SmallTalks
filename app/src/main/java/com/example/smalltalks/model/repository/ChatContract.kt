@@ -1,4 +1,4 @@
-package com.example.smalltalks.model.repository.remote
+package com.example.smalltalks.model.repository
 
 import com.example.smalltalks.view.chat.MessageItem
 import kotlinx.coroutines.flow.Flow
