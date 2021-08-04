@@ -35,6 +35,9 @@ android {
     }
     kapt {
         javacOptions {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas")
+            }
             // These options are normally set automatically via the Hilt Gradle plugin, but we
             // set them manually to workaround a bug in the Kotlin 1.5.20
             option("-Adagger.fastInit=ENABLED")

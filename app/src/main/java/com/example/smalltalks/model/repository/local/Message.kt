@@ -2,11 +2,12 @@ package com.example.smalltalks.model.repository.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import com.example.smalltalks.view.chat.MessageItem
+import com.example.smalltalks.model.remote_protocol.User
 
 @Entity
 data class Message(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    val messageItem: MessageItem
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val from: User,
+    val to: User,
+    val message: String
 )

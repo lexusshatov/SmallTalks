@@ -6,8 +6,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smalltalks.databinding.ChatItemBinding
+import com.example.smalltalks.model.repository.local.Message
 
-class ChatAdapter(messageList: List<MessageItem> = emptyList()) : ListAdapter<MessageItem, ChatAdapter.ViewHolder>(UserDiffCallback()) {
+class ChatAdapter(private val meId: String, messageList: List<Message> = emptyList()) :
+    ListAdapter<Message, ChatAdapter.ViewHolder>(UserDiffCallback()) {
     init {
         submitList(messageList)
     }
@@ -23,7 +25,7 @@ class ChatAdapter(messageList: List<MessageItem> = emptyList()) : ListAdapter<Me
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val message = getItem(position)
-        holder.bind(message)
+        holder.bind(meId, message)
     }
 
     override fun getItemCount() = currentList.size
@@ -31,28 +33,29 @@ class ChatAdapter(messageList: List<MessageItem> = emptyList()) : ListAdapter<Me
 
     class ViewHolder(private val binding: ChatItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(messageItem: MessageItem) {
+        fun bind(meId: String, message: Message) {
             binding.apply {
-                if (messageItem.fromMe) {
+                if (message.from.id == meId) {
                     //TODO set gravity layout to end
                 }
-                chatUserName.text = messageItem.messageDto.from.name
-                chatMessage.text = messageItem.messageDto.message
+                chatUserName.text = message.from.name
+                chatMessage.text = message.message
             }
         }
     }
 
-    private class UserDiffCallback : DiffUtil.ItemCallback<MessageItem>() {
-        override fun areItemsTheSame(oldItem: MessageItem, newItem: MessageItem): Boolean {
+    private class UserDiffCallback : DiffUtil.ItemCallback<Message>() {
+        override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
             return false
         }
 
-        override fun areContentsTheSame(oldItem: MessageItem, newItem: MessageItem): Boolean {
+        override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {
             return false
         }
     }
 
-    fun add(messageItem: MessageItem) {
+    //TODO maybe delete
+    fun add(messageItem: Message) {
         submitList(currentList + messageItem)
     }
 }

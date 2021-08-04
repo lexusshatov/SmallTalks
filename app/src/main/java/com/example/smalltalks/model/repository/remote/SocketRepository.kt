@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.smalltalks.model.remote_protocol.*
-import com.example.smalltalks.view.chat.MessageItem
+import com.example.smalltalks.model.remote_protocol.BaseDto.Action.*
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,9 +18,8 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.Socket
-import javax.inject.Inject
 
-class SocketRemote @Inject constructor(
+class SocketRepository(
     private val gson: Gson
 ) : RemoteData {
     private lateinit var socket: Socket
@@ -33,8 +32,8 @@ class SocketRemote @Inject constructor(
 
     override lateinit var me: User
 
-    private val mutableMessages = MutableSharedFlow<MessageItem>()
-    override val messages: SharedFlow<MessageItem>
+    private val mutableMessages = MutableSharedFlow<MessageDto>()
+    override val messages: SharedFlow<MessageDto>
         get() = mutableMessages
 
     private val mutableUsers by lazy {
@@ -47,18 +46,16 @@ class SocketRemote @Inject constructor(
         MutableLiveData<List<User>>()
     }
     override val users: LiveData<List<User>>
-        get() {
-            userRequest(output, me.id)
-            return mutableUsers
-        }
+        get() = mutableUsers
 
-    private val mutableConnect = MutableLiveData<Boolean>()
-    override val connect: LiveData<Boolean>
+    private val mutableConnect = MutableLiveData<ConnectState>()
+    override val connect: LiveData<ConnectState>
         get() = mutableConnect
 
     override fun connect(userName: String) {
         GlobalScope.launch(Dispatchers.IO) {
             runCatching {
+                mutableConnect.postValue(ConnectState.Connect(userName))
                 // FIXME: 30.07.2021
                 val ip =
                     "192.168.88.26"//withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
@@ -67,13 +64,12 @@ class SocketRemote @Inject constructor(
                 val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
                 me = User(userId, userName)
                 connectUser(output, userId, userName)
-                mutableConnect.postValue(true)
+                mutableConnect.postValue(ConnectState.Success)
 
                 startPings(output, userId)
                 startListening(input)
             }
                 .onFailure {
-                    mutableConnect.postValue(false)
                     Log.e(TAG, it.toString())
                     freeingResources()
                 }
@@ -87,27 +83,30 @@ class SocketRemote @Inject constructor(
                 delay(delayTime)
                 timeoutPong -= delayTime
             }
-            disconnect()
-            connect(me.name)
+            reconnect(me.name)
         }
         backgroundScope.launch(Dispatchers.IO) {
             runCatching {
                 while (true) {
                     val baseDto = gson.fromJson(input.readLine(), BaseDto::class.java)
                     when (baseDto.action) {
-                        BaseDto.Action.NEW_MESSAGE -> {
+                        NEW_MESSAGE -> {
                             val newMessageDto =
                                 gson.fromJson(baseDto.payload, MessageDto::class.java)
-                            val messageItem = MessageItem(newMessageDto, false)
-                            mutableMessages.emit(messageItem)
+                            mutableMessages.emit(newMessageDto)
                         }
-                        BaseDto.Action.USERS_RECEIVED -> {
+                        USERS_RECEIVED -> {
                             val usersReceivedDto =
                                 gson.fromJson(baseDto.payload, UsersReceivedDto::class.java)
                             mutableUsers.postValue(usersReceivedDto.users)
                         }
-                        BaseDto.Action.PONG -> {
+                        PONG -> {
                             timeoutPong = 15000L
+                        }
+                        DISCONNECT -> {
+                            reconnect(me.name)
+                        }
+                        else -> {
                         }
                     }
                 }
@@ -115,10 +114,15 @@ class SocketRemote @Inject constructor(
         }
     }
 
+    private fun reconnect(userName: String) {
+        disconnect()
+        connect(userName)
+    }
+
     override fun sendMessage(to: String, message: String) {
         backgroundScope.launch(Dispatchers.IO) {
             val sendMessageDto = SendMessageDto(me.id, to, message)
-            val baseDto = BaseDto(BaseDto.Action.SEND_MESSAGE, gson.toJson(sendMessageDto))
+            val baseDto = BaseDto(SEND_MESSAGE, gson.toJson(sendMessageDto))
             output.println(gson.toJson(baseDto))
         }
     }
@@ -147,7 +151,7 @@ class SocketRemote @Inject constructor(
                 }
             }
                 .onSuccess { ip -> Log.d(TAG, "Server IP: $ip") }
-                .onFailure { throwable -> Log.e(TAG, "Failed to get server address", throwable) }
+                .onFailure { error("Failed to get server address", it) }
                 .getOrThrow()
         }
 
@@ -161,7 +165,7 @@ class SocketRemote @Inject constructor(
                 }
             }
                 .onSuccess { Log.d(TAG, "Connected") }
-                .onFailure { throwable -> Log.e(TAG, "Connect to server failed", throwable) }
+                .onFailure { error("Connect to server failed", it) }
         }
 
     private fun getUserIdAsync(input: BufferedReader) =
@@ -172,7 +176,7 @@ class SocketRemote @Inject constructor(
                 connectedDto.id
             }
                 .onSuccess { userId -> Log.d(TAG, "User ID: $userId") }
-                .onFailure { throwable -> Log.e(TAG, "Failed to get user id", throwable) }
+                .onFailure { error("Failed to get user id", it) }
                 .getOrThrow()
         }
 
@@ -180,17 +184,17 @@ class SocketRemote @Inject constructor(
         backgroundScope.launch(Dispatchers.IO) {
             runCatching {
                 val connectDto = ConnectDto(userId, userName)
-                val baseDto = BaseDto(BaseDto.Action.CONNECT, gson.toJson(connectDto))
+                val baseDto = BaseDto(CONNECT, gson.toJson(connectDto))
                 output.println(gson.toJson(baseDto))
             }
                 .onSuccess { Log.d(TAG, "Sent user connect") }
-                .onFailure { throwable -> Log.e(TAG, "User connecting failed", throwable) }
+                .onFailure { error("User connecting failed", it) }
         }
     }
 
     private suspend fun startPings(output: PrintWriter, userId: String) {
         backgroundScope.launch(Dispatchers.IO) {
-            val baseDto = BaseDto(BaseDto.Action.PING, gson.toJson(PingDto(userId)))
+            val baseDto = BaseDto(PING, gson.toJson(PingDto(userId)))
             val pingMessage = gson.toJson(baseDto)
             while (true) {
                 output.println(pingMessage)
@@ -202,7 +206,7 @@ class SocketRemote @Inject constructor(
 
     private fun userRequest(output: PrintWriter, userId: String) {
         backgroundScope.launch(Dispatchers.IO) {
-            val baseDto = BaseDto(BaseDto.Action.GET_USERS, gson.toJson(GetUsersDto(userId)))
+            val baseDto = BaseDto(GET_USERS, gson.toJson(GetUsersDto(userId)))
             val getUsersMessage = gson.toJson(baseDto)
             output.println(getUsersMessage)
         }
@@ -237,7 +241,7 @@ class SocketRemote @Inject constructor(
                 || Build.PRODUCT.contains("simulator"))
     }
 
-    fun disconnect() {
+    override fun disconnect() {
         backgroundScope.launch(Dispatchers.IO) {
             runCatching {
                 freeingResources()
@@ -246,8 +250,13 @@ class SocketRemote @Inject constructor(
         }
     }
 
+    private fun error(message: String, throwable: Throwable) {
+        Log.e(TAG, message, throwable)
+        mutableConnect.postValue(ConnectState.Error(message))
+    }
+
     private companion object {
-        val TAG: String = SocketRemote::class.java.simpleName
+        val TAG: String = SocketRepository::class.java.simpleName
         const val EMULATOR_IP = "10.0.2.2"
         const val HOST_BROADCAST = "255.255.255.255"
         const val PORT_BROADCAST = 8888
@@ -258,6 +267,6 @@ class SocketRemote @Inject constructor(
         const val TIMEOUT_GET_UID = 5000L
 
         const val PING_DELAY = 5000L
-        const val USERS_REQUEST_DELAY = 7000L
+        const val USERS_REQUEST_DELAY = 3000L
     }
 }

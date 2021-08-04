@@ -33,8 +33,8 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
             adapter = this@UserListFragment.adapter
         }
 
-        viewModel.data.observe(viewLifecycleOwner, {
-            adapter.submitList(it)
+        viewModel.data.observe(viewLifecycleOwner, { list ->
+            adapter.submitList(list.filter { it.name.isNotEmpty() })
         })
     }
 

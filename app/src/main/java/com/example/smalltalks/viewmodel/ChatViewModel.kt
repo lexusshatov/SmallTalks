@@ -1,33 +1,55 @@
 package com.example.smalltalks.viewmodel
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.smalltalks.model.di.decorator.Decorator
+import com.example.smalltalks.model.remote_protocol.User
 import com.example.smalltalks.model.repository.decorator.DataRepository
-import com.example.smalltalks.view.chat.MessageItem
+import com.example.smalltalks.model.repository.local.Message
 import com.example.smalltalks.viewmodel.base.BaseViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class ChatViewModel @Inject constructor(
-    @Decorator private val repository: DataRepository,
+class ChatViewModel @AssistedInject constructor(
+    private val decorator: DataRepository,
+    @Assisted private val receiver: User
 ) : BaseViewModel() {
 
-    val me = repository.me
-    override val data
-        get() = repository.messages
+    val me = decorator.me
 
-    fun saveMessage(messageItem: MessageItem) {
+    override val data: LiveData<List<Message>>
+        get() = decorator.getDialog(me, receiver)
+
+    fun sendMessage(message: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.saveMessage(messageItem)
+            val messageDb = Message(
+                from = me,
+                to = receiver,
+                message = message
+            )
+            decorator.saveMessage(messageDb)
+            decorator.sendMessage(receiver.id, message)
         }
     }
 
-    fun sendMessage(to: String, message: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.sendMessage(to, message)
+    @AssistedFactory
+    interface Factory {
+        fun create(receiver: User): ChatViewModel
+    }
+
+    companion object {
+        fun provideFactory(
+            assistedFactory: Factory,
+            receiver: User
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return assistedFactory.create(receiver) as T
+            }
         }
     }
 }

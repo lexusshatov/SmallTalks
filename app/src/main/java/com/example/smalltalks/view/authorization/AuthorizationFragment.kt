@@ -11,6 +11,7 @@ import androidx.core.content.edit
 import androidx.fragment.app.viewModels
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentAuthorizationBinding
+import com.example.smalltalks.model.repository.remote.ConnectState
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.user_list.UserListFragment
 import com.example.smalltalks.viewmodel.AuthorizationViewModel
@@ -61,10 +62,10 @@ class AuthorizationFragment :
 
         viewModel.data.observe(viewLifecycleOwner, {
             binding.buttonLogin.isClickable = true
-            if (it) {
-                navigateToUsers()
-            } else {
-                showToast("Error on connecting")
+            when (it) {
+                is ConnectState.Connect -> {}
+                is ConnectState.Success -> navigateToUsers()
+                is ConnectState.Error -> showToast(it.message)
             }
         })
     }
