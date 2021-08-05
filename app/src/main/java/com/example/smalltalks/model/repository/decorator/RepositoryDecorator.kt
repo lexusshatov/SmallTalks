@@ -20,19 +20,23 @@ class RepositoryDecorator(
     override val messages: Flow<MessageDto>
         get() = socketRepository.messages
 
-    override fun connect(userName: String) =
+    override suspend fun connect(userName: String) =
         socketRepository.connect(userName)
 
-    override fun disconnect() =
+    override suspend fun disconnect() =
         socketRepository.disconnect()
 
-    override fun sendMessage(to: String, message: String) =
+    override suspend fun sendMessage(to: User, message: String) {
+        val messageDb = Message(
+            from = me,
+            to = to,
+            message = message
+        )
+        saveMessage(messageDb)
         socketRepository.sendMessage(to, message)
+    }
 
-    override fun getMessages() =
-        localRepository.getMessages()
-
-    override fun saveMessage(message: Message) =
+    override suspend fun saveMessage(message: Message) =
         localRepository.saveMessage(message)
 
     override fun getDialog(user1: User, user2: User) =

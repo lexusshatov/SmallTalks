@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.model.remote_protocol.User
-import com.example.smalltalks.model.repository.decorator.DataRepository
+import com.example.smalltalks.model.repository.base.chat.ChatContract
 import com.example.smalltalks.model.repository.local.Message
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.assisted.Assisted
@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ChatViewModel @AssistedInject constructor(
-    private val decorator: DataRepository,
+    private val decorator: ChatContract,
     @Assisted private val receiver: User
 ) : BaseViewModel() {
 
@@ -26,13 +26,7 @@ class ChatViewModel @AssistedInject constructor(
 
     fun sendMessage(message: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val messageDb = Message(
-                from = me,
-                to = receiver,
-                message = message
-            )
-            decorator.saveMessage(messageDb)
-            decorator.sendMessage(receiver.id, message)
+            decorator.sendMessage(receiver, message)
         }
     }
 

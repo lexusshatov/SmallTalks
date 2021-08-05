@@ -1,18 +1,16 @@
 package com.example.smalltalks.view.user_list
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.smalltalks.R
 import com.example.smalltalks.databinding.ListItemBinding
 import com.example.smalltalks.model.remote_protocol.User
-import com.example.smalltalks.view.chat.ChatFragment
 
 class UserListAdapter(
-    private val fragmentManager: FragmentManager
+    private val onClick: View.OnClickListener
 ) : ListAdapter<User, UserListAdapter.ViewHolder>(UserDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -21,28 +19,24 @@ class UserListAdapter(
             parent,
             false
         )
-        return ViewHolder(binding, fragmentManager)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val user = getItem(position)
-        holder.bind(user)
+        holder.itemView.tag = user
+        holder.bind(user, onClick)
     }
 
     override fun getItemCount() = currentList.size
 
 
-    class ViewHolder(private val binding: ListItemBinding, private val fragmentManager: FragmentManager) : RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(private val binding: ListItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(user: User) {
+        fun bind(user: User, onClick: View.OnClickListener) {
             binding.apply {
                 itemContainer.text = user.name
-                itemContainer.setOnClickListener{
-                    fragmentManager.beginTransaction()
-                        .replace(R.id.frame_container, ChatFragment(user))
-                        .addToBackStack(null)
-                        .commit()
-                }
+                itemContainer.setOnClickListener(onClick)
             }
         }
     }

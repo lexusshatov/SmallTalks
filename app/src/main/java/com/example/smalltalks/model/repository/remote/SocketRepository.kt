@@ -54,7 +54,7 @@ class SocketRepository(
     override val connectState: StateFlow<ConnectState>
         get() = mutableConnectState
 
-    override fun connect(userName: String) {
+    override suspend fun connect(userName: String) {
         GlobalScope.launch(Dispatchers.IO) {
             runCatching {
                 mutableConnectState.value = ConnectState.Connect(userName)
@@ -72,7 +72,7 @@ class SocketRepository(
                 startListening(input)
             }
                 .onFailure {
-                    mutableConnectState.value = ConnectState.Error(it.message?: "Unknown error")
+                    mutableConnectState.value = ConnectState.Error(it.message ?: "Unknown error")
                     Log.e(TAG, it.toString())
                     freeingResources()
                 }
@@ -117,14 +117,14 @@ class SocketRepository(
         }
     }
 
-    private fun reconnect(userName: String) {
+    private suspend fun reconnect(userName: String) {
         disconnect()
         connect(userName)
     }
 
-    override fun sendMessage(to: String, message: String) {
+    override suspend fun sendMessage(to: User, message: String) {
         backgroundScope.launch(Dispatchers.IO) {
-            val sendMessageDto = SendMessageDto(me.id, to, message)
+            val sendMessageDto = SendMessageDto(me.id, to.id, message)
             val baseDto = BaseDto(SEND_MESSAGE, gson.toJson(sendMessageDto))
             output.println(gson.toJson(baseDto))
         }
@@ -244,7 +244,7 @@ class SocketRepository(
                 || Build.PRODUCT.contains("simulator"))
     }
 
-    override fun disconnect() {
+    override suspend fun disconnect() {
         backgroundScope.launch(Dispatchers.IO) {
             runCatching {
                 freeingResources()

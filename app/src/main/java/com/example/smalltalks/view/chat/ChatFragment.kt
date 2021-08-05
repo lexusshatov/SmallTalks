@@ -14,9 +14,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ChatFragment(
-    private val receiver: User
-) : BaseFragment<ChatViewModel, FragmentChatBinding>() {
+class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
+
+    private lateinit var receiver: User
 
     @Inject
     lateinit var viewModelFactory: ChatViewModel.Factory
@@ -31,6 +31,11 @@ class ChatFragment(
         }
 
     private lateinit var adapter: ChatAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        receiver = arguments?.get(USER_KEY) as User
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -68,5 +73,15 @@ class ChatFragment(
             }
         }
         return true
+    }
+
+    companion object {
+        const val USER_KEY = "user"
+
+        fun newInstance(receiver: User) = ChatFragment().apply {
+            arguments = Bundle().apply {
+                putSerializable(USER_KEY, receiver)
+            }
+        }
     }
 }

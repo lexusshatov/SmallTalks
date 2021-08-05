@@ -10,11 +10,7 @@ class LocalRepository @Inject constructor(
     private val dao: MessageDao,
 ) : LocalData {
 
-    override fun getMessages(): LiveData<List<Message>> {
-        return dao.getAll()
-    }
-
-    override fun saveMessage(message: Message) {
+    override suspend fun saveMessage(message: Message) {
         dao.addMessage(message)
     }
 

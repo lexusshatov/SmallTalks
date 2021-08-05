@@ -2,10 +2,10 @@ package com.example.smalltalks.view.authorization
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.fragment.app.viewModels
@@ -39,6 +39,7 @@ class AuthorizationFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "Login"
+        userName?.let { binding.editTextTextPersonName.setText(it) }
 
         binding.apply {
             buttonLogin.setOnClickListener {
@@ -62,11 +63,10 @@ class AuthorizationFragment :
             withContext(Dispatchers.IO) {
                 data.collect { state ->
                     withContext(Dispatchers.Main) {
-                        println(state)
+                        Log.d(TAG, "Connect state: ${state.javaClass.simpleName}")
                         when (state) {
                             is ConnectState.Nothing -> {
                                 userName?.let {
-                                    binding.editTextTextPersonName.setText(it)
                                     viewModel.connect(it)
                                 }
                             }
@@ -102,9 +102,7 @@ class AuthorizationFragment :
     companion object {
         const val USER_PREFERENCES = "User_preferences"
         const val USER_NAME = "User_name"
-    }
 
-    private fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        private val TAG = AuthorizationFragment::class.java.simpleName
     }
 }

@@ -8,12 +8,9 @@ import androidx.room.Query
 @Dao
 interface MessageDao {
 
-    @Query("SELECT * FROM Message")
-    fun getAll(): LiveData<List<Message>>
-
     @Query("SELECT * FROM Message WHERE (`from`= :user1 AND `to`= :user2) OR (`to`= :user1 AND `from`= :user2)")
     fun getDialog(user1: String, user2: String): LiveData<List<Message>>
 
     @Insert
-    fun addMessage(message: Message)
+    suspend fun addMessage(message: Message)
 }

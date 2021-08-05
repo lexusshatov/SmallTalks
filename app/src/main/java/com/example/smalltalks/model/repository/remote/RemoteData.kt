@@ -1,7 +1,7 @@
 package com.example.smalltalks.model.repository.remote
 
-import com.example.smalltalks.model.repository.base.AuthorizationContract
-import com.example.smalltalks.model.repository.base.ChatContract
-import com.example.smalltalks.model.repository.base.UserListContract
+import com.example.smalltalks.model.repository.base.authorization.AuthorizationContract
+import com.example.smalltalks.model.repository.base.chat.RemoteChatContract
+import com.example.smalltalks.model.repository.base.userlist.RemoteUserListContract
 
-interface RemoteData : AuthorizationContract, ChatContract, UserListContract
+interface RemoteData : AuthorizationContract, RemoteChatContract, RemoteUserListContract
