@@ -12,7 +12,7 @@ class RepositoryDecorator(
     private val socketRepository: RemoteData
 ) : DataRepository {
 
-    override val connect = socketRepository.connect
+    override val connectState = socketRepository.connectState
     override val me
         get() = socketRepository.me
     override val users

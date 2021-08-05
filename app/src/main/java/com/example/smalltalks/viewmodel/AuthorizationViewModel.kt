@@ -10,7 +10,7 @@ class AuthorizationViewModel @Inject constructor(
     private val decorator: AuthorizationContract
 ) : BaseViewModel() {
 
-    override val data = decorator.connect
+    override val data = decorator.connectState
 
     fun connect(userName: String) {
         decorator.connect(userName)

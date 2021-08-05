@@ -9,7 +9,9 @@ import com.example.smalltalks.model.remote_protocol.BaseDto.Action.*
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -48,14 +50,14 @@ class SocketRepository(
     override val users: LiveData<List<User>>
         get() = mutableUsers
 
-    private val mutableConnect = MutableLiveData<ConnectState>()
-    override val connect: LiveData<ConnectState>
-        get() = mutableConnect
+    private val mutableConnectState = MutableStateFlow<ConnectState>(ConnectState.Nothing)
+    override val connectState: StateFlow<ConnectState>
+        get() = mutableConnectState
 
     override fun connect(userName: String) {
         GlobalScope.launch(Dispatchers.IO) {
             runCatching {
-                mutableConnect.postValue(ConnectState.Connect(userName))
+                mutableConnectState.value = ConnectState.Connect(userName)
                 // FIXME: 30.07.2021
                 val ip =
                     "192.168.88.26"//withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
@@ -64,12 +66,13 @@ class SocketRepository(
                 val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
                 me = User(userId, userName)
                 connectUser(output, userId, userName)
-                mutableConnect.postValue(ConnectState.Success)
+                mutableConnectState.value = ConnectState.Success
 
                 startPings(output, userId)
                 startListening(input)
             }
                 .onFailure {
+                    mutableConnectState.value = ConnectState.Error(it.message?: "Unknown error")
                     Log.e(TAG, it.toString())
                     freeingResources()
                 }
@@ -252,7 +255,7 @@ class SocketRepository(
 
     private fun error(message: String, throwable: Throwable) {
         Log.e(TAG, message, throwable)
-        mutableConnect.postValue(ConnectState.Error(message))
+        mutableConnectState.value = ConnectState.Error(message)
     }
 
     private companion object {
