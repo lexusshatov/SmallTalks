@@ -55,28 +55,27 @@ class SocketRepository(
         get() = mutableConnectState
 
     override suspend fun connect(userName: String) {
-        GlobalScope.launch(Dispatchers.IO) {
-            runCatching {
-                mutableConnectState.value = ConnectState.Connect(userName)
-                // FIXME: 30.07.2021
-                val ip =
-                    "192.168.88.26"//withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
-                //init socket, in/out streams
-                withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServer(ip).join() }
-                val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
-                me = User(userId, userName)
-                connectUser(output, userId, userName)
-                mutableConnectState.value = ConnectState.Success
+        runCatching {
+            mutableConnectState.value = ConnectState.Connect(userName)
+            // FIXME: 30.07.2021
+            //"192.168.88.26"
+            val ip =
+                "192.168.88.26"//withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
+            //init socket, in/out streams
+            withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServer(ip).join() }
+            val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
+            me = User(userId, userName)
+            connectUser(output, userId, userName)
+            mutableConnectState.value = ConnectState.Success
 
-                startPings(output, userId)
-                startListening(input)
-            }
-                .onFailure {
-                    mutableConnectState.value = ConnectState.Error(it.message ?: "Unknown error")
-                    Log.e(TAG, it.toString())
-                    freeingResources()
-                }
+            startPings(output, userId)
+            startListening(input)
         }
+            .onFailure {
+                mutableConnectState.value = ConnectState.Error(it.message ?: "Unknown error")
+                Log.e(TAG, it.toString())
+                freeingResources()
+            }
     }
 
     private fun startListening(input: BufferedReader) {
@@ -143,6 +142,7 @@ class SocketRepository(
                         PORT_BROADCAST
                     )
                     DatagramSocket().apply {
+                        soTimeout = 5000
                         send(packet)
                         receive(packet)
                         close()

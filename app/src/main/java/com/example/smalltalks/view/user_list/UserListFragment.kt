@@ -10,7 +10,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentUserListBinding
-import com.example.smalltalks.model.remote_protocol.User
 import com.example.smalltalks.view.authorization.AuthorizationFragment
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.base.IOnBackPressed
@@ -34,9 +33,8 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
 
     private val adapter by lazy {
         UserListAdapter {
-            val user = it.tag as User
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.frame_container, ChatFragment.newInstance(user))
+                .replace(R.id.frame_container, ChatFragment.newInstance(it))
                 .addToBackStack(null)
                 .commit()
         }

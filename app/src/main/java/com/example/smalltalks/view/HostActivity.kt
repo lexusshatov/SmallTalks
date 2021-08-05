@@ -14,11 +14,11 @@ class HostActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_host)
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.frame_container, AuthorizationFragment())
-            .commit()
-
-
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_container, AuthorizationFragment())
+                .commit()
+        }
     }
 
     override fun onBackPressed() {

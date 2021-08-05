@@ -30,6 +30,7 @@ class ChatViewModel @AssistedInject constructor(
         }
     }
 
+
     @AssistedFactory
     interface Factory {
         fun create(receiver: User): ChatViewModel

@@ -1,7 +1,6 @@
 package com.example.smalltalks.view.user_list
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -10,7 +9,7 @@ import com.example.smalltalks.databinding.ListItemBinding
 import com.example.smalltalks.model.remote_protocol.User
 
 class UserListAdapter(
-    private val onClick: View.OnClickListener
+    private val onClick: (User) -> Unit
 ) : ListAdapter<User, UserListAdapter.ViewHolder>(UserDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -24,19 +23,18 @@ class UserListAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val user = getItem(position)
-        holder.itemView.tag = user
         holder.bind(user, onClick)
     }
-
-    override fun getItemCount() = currentList.size
 
 
     class ViewHolder(private val binding: ListItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(user: User, onClick: View.OnClickListener) {
+        fun bind(user: User, onClick: (User) -> Unit) {
             binding.apply {
                 itemContainer.text = user.name
-                itemContainer.setOnClickListener(onClick)
+                itemContainer.setOnClickListener {
+                    onClick(user)
+                }
             }
         }
     }

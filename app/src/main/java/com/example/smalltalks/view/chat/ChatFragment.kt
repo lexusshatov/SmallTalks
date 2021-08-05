@@ -9,6 +9,7 @@ import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentChatBinding
 import com.example.smalltalks.model.remote_protocol.User
 import com.example.smalltalks.view.base.BaseFragment
+import com.example.smalltalks.view.chat.adapter.ChatAdapter
 import com.example.smalltalks.viewmodel.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -40,7 +41,7 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (requireActivity() as AppCompatActivity).supportActionBar?.title = receiver.name
-        adapter = ChatAdapter(meId = viewModel.me.id)
+        adapter = ChatAdapter(viewModel.me.id)
 
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context).apply {
