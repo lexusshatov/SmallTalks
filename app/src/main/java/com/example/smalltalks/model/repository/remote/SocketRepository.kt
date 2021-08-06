@@ -30,6 +30,7 @@ class SocketRepository(
 
     private var timeoutPong = 15000L
 
+    //TODO supervisor job
     private val backgroundScope = CoroutineScope(Dispatchers.IO) + SupervisorJob()
 
     override lateinit var me: User
@@ -38,6 +39,7 @@ class SocketRepository(
     override val messages: SharedFlow<MessageDto>
         get() = mutableMessages
 
+    //TODO getUsers()
     private val mutableUsers by lazy {
         backgroundScope.launch(Dispatchers.IO) {
             while (isActive) {
@@ -57,7 +59,7 @@ class SocketRepository(
         get() = mutableConnectState
 
     override suspend fun connect(userName: String) {
-        CoroutineScope(Dispatchers.IO).runCatching {
+        runCatching {
             mutableConnectState.value = ConnectState.Connect(userName)
 
             val ip = getServerAddress(TIMEOUT_BROADCAST)
@@ -88,7 +90,8 @@ class SocketRepository(
         backgroundScope.launch(Dispatchers.IO) {
             runCatching {
                 while (isActive) {
-                    val baseDto = gson.fromJson(runInterruptible { input.readLine() }, BaseDto::class.java)
+                    val baseDto =
+                        gson.fromJson(runInterruptible { input.readLine() }, BaseDto::class.java)
                     when (baseDto.action) {
                         NEW_MESSAGE -> {
                             val newMessageDto =
@@ -106,7 +109,8 @@ class SocketRepository(
                         DISCONNECT -> {
                             reconnect(me.name)
                         }
-                        else -> {}
+                        else -> {
+                        }
                     }
                 }
             }
@@ -127,6 +131,7 @@ class SocketRepository(
     }
 
     private suspend fun getServerAddress(timeout: Int) =
+        //TODO trycatch
         runInterruptible(backgroundScope.coroutineContext) {
             runCatching {
                 if (isEmulator()) EMULATOR_IP

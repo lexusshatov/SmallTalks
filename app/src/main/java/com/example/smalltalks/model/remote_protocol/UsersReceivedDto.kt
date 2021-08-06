@@ -1,7 +1,10 @@
 package com.example.smalltalks.model.remote_protocol
 
-import java.io.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 
 data class UsersReceivedDto(val users: List<User>) : Payload
 
-data class User(val id: String, val name: String): Serializable
+@Parcelize
+data class User(val id: String, val name: String): Parcelable

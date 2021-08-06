@@ -13,6 +13,7 @@ class AuthorizationViewModel @Inject constructor(
     private val decorator: AuthorizationContract
 ) : BaseViewModel() {
 
+    //TODO livedata + collect
     override val data = decorator.connectState
 
     fun connect(userName: String) {

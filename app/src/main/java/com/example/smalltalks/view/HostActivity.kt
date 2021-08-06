@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.smalltalks.R
 import com.example.smalltalks.view.authorization.AuthorizationFragment
-import com.example.smalltalks.view.base.IOnBackPressed
+import com.example.smalltalks.view.base.OnBackPressed
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,7 +23,7 @@ class HostActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.frame_container)
-        (currentFragment as? IOnBackPressed).apply {
+        (currentFragment as? OnBackPressed).apply {
             if (this != null) {
                 onBackPressed()
             } else {

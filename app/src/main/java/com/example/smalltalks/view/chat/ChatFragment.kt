@@ -35,7 +35,7 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        receiver = arguments?.get(USER_KEY) as User
+        receiver = arguments?.getParcelable(USER_KEY)!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,7 +81,7 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
 
         fun newInstance(receiver: User) = ChatFragment().apply {
             arguments = Bundle().apply {
-                putSerializable(USER_KEY, receiver)
+                putParcelable(USER_KEY, receiver)
             }
         }
     }

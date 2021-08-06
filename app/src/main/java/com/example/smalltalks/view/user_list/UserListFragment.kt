@@ -12,7 +12,7 @@ import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentUserListBinding
 import com.example.smalltalks.view.authorization.AuthorizationFragment
 import com.example.smalltalks.view.base.BaseFragment
-import com.example.smalltalks.view.base.IOnBackPressed
+import com.example.smalltalks.view.base.OnBackPressed
 import com.example.smalltalks.view.chat.ChatFragment
 import com.example.smalltalks.viewmodel.UserListViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding>(),
-    IOnBackPressed {
+    OnBackPressed {
     private var clickCount = 0
 
     override val viewModel by viewModels<UserListViewModel>()
@@ -75,6 +75,7 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
         return true
     }
 
+    //TODO BackPressedHandler
     override fun onBackPressed() {
         clickCount++
         when (clickCount) {

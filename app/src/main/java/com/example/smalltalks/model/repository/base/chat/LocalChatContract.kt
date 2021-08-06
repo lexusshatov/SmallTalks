@@ -5,6 +5,6 @@ import com.example.smalltalks.model.remote_protocol.User
 import com.example.smalltalks.model.repository.local.Message
 
 interface LocalChatContract {
-
+//TODO 1 user
     fun getDialog(user1: User, user2: User): LiveData<List<Message>>
 }

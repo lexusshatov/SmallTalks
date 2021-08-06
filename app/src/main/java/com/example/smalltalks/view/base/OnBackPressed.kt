@@ -1,5 +1,5 @@
 package com.example.smalltalks.view.base
 
-interface IOnBackPressed {
+interface OnBackPressed {
     fun onBackPressed()
 }

@@ -6,10 +6,10 @@ import com.example.smalltalks.databinding.ReceiverChatItemBinding
 
 object ViewHolderFactory {
 
-    fun create(binding: ViewBinding?): MultiViewHolder? =
+    fun create(binding: ViewBinding?): MultiViewHolder =
         when (binding) {
             is MyChatItemBinding -> ChatAdapter.MyViewHolder(binding)
             is ReceiverChatItemBinding -> ChatAdapter.ReceiverViewHolder(binding)
-            else -> null
+            else -> throw IllegalArgumentException("Unknown ViewBinding")
         }
 }

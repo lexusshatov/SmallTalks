@@ -88,6 +88,7 @@ class AuthorizationFragment :
         }
     }
 
+    //TODO BaseFragment
     private fun navigateToUsers() {
         requireActivity().supportFragmentManager
             .beginTransaction()
