@@ -21,10 +21,4 @@ class AuthorizationViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        viewModelScope.launch(Dispatchers.IO) {
-            decorator.disconnect()
-        }
-        super.onCleared()
-    }
 }

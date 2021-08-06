@@ -40,8 +40,10 @@ class SocketRepository(
 
     private val mutableUsers by lazy {
         backgroundScope.launch(Dispatchers.IO) {
-            while (true) {
-                userRequest(output, me.id)
+            while (isActive) {
+                val baseDto = BaseDto(GET_USERS, gson.toJson(GetUsersDto(me.id)))
+                val getUsersMessage = gson.toJson(baseDto)
+                output.println(getUsersMessage)
                 delay(USERS_REQUEST_DELAY)
             }
         }
@@ -55,32 +57,28 @@ class SocketRepository(
         get() = mutableConnectState
 
     override suspend fun connect(userName: String) {
-        runCatching {
+        CoroutineScope(Dispatchers.IO).runCatching {
             mutableConnectState.value = ConnectState.Connect(userName)
-            // FIXME: 30.07.2021
-            //"192.168.88.26"
-            val ip =
-                "192.168.88.26"//withTimeout(TIMEOUT_BROADCAST) { getServerAddressAsync().await() }
+
+            val ip = getServerAddress(TIMEOUT_BROADCAST)
             //init socket, in/out streams
-            withTimeout(TIMEOUT_CONNECT_SERVER) { connectToServer(ip).join() }
-            val userId = withTimeout(TIMEOUT_GET_UID) { getUserIdAsync(input).await() }
+            connectToServer(ip, TIMEOUT_CONNECT_SERVER)
+            val userId = getUserIdAsync(socket, input, TIMEOUT_GET_UID)
             me = User(userId, userName)
             connectUser(output, userId, userName)
-            mutableConnectState.value = ConnectState.Success
 
             startPings(output, userId)
             startListening(input)
         }
+            .onSuccess { mutableConnectState.value = ConnectState.Success }
             .onFailure {
-                mutableConnectState.value = ConnectState.Error(it.message ?: "Unknown error")
-                Log.e(TAG, it.toString())
                 freeingResources()
             }
     }
 
     private fun startListening(input: BufferedReader) {
         backgroundScope.launch(Dispatchers.IO) {
-            while (timeoutPong > 0) {
+            while (timeoutPong > 0 && isActive) {
                 val delayTime = 1000L
                 delay(delayTime)
                 timeoutPong -= delayTime
@@ -89,8 +87,8 @@ class SocketRepository(
         }
         backgroundScope.launch(Dispatchers.IO) {
             runCatching {
-                while (true) {
-                    val baseDto = gson.fromJson(input.readLine(), BaseDto::class.java)
+                while (isActive) {
+                    val baseDto = gson.fromJson(runInterruptible { input.readLine() }, BaseDto::class.java)
                     when (baseDto.action) {
                         NEW_MESSAGE -> {
                             val newMessageDto =
@@ -108,8 +106,7 @@ class SocketRepository(
                         DISCONNECT -> {
                             reconnect(me.name)
                         }
-                        else -> {
-                        }
+                        else -> {}
                     }
                 }
             }
@@ -129,8 +126,8 @@ class SocketRepository(
         }
     }
 
-    private fun getServerAddressAsync() =
-        backgroundScope.async(Dispatchers.IO) {
+    private suspend fun getServerAddress(timeout: Int) =
+        runInterruptible(backgroundScope.coroutineContext) {
             runCatching {
                 if (isEmulator()) EMULATOR_IP
                 else {
@@ -142,7 +139,7 @@ class SocketRepository(
                         PORT_BROADCAST
                     )
                     DatagramSocket().apply {
-                        soTimeout = 5000
+                        soTimeout = timeout
                         send(packet)
                         receive(packet)
                         close()
@@ -158,10 +155,11 @@ class SocketRepository(
                 .getOrThrow()
         }
 
-    private fun connectToServer(ip: String) =
-        backgroundScope.launch(Dispatchers.IO) {
+    private suspend fun connectToServer(ip: String, timeout: Int) =
+        runInterruptible(backgroundScope.coroutineContext) {
             runCatching {
                 Socket(ip, PORT_SERVER).apply {
+                    soTimeout = timeout
                     socket = this
                     input = BufferedReader(InputStreamReader(getInputStream()))
                     output = PrintWriter(OutputStreamWriter(getOutputStream()))
@@ -171,10 +169,13 @@ class SocketRepository(
                 .onFailure { error("Connect to server failed", it) }
         }
 
-    private fun getUserIdAsync(input: BufferedReader) =
-        backgroundScope.async(Dispatchers.IO) {
+    private suspend fun getUserIdAsync(socket: Socket, input: BufferedReader, timeout: Int) =
+        runInterruptible(backgroundScope.coroutineContext) {
             runCatching {
-                val baseDto = gson.fromJson(input.readLine(), BaseDto::class.java)
+                socket.soTimeout = timeout
+                val inputUserId = input.readLine()
+                socket.soTimeout = TIMEOUT_INFINITY
+                val baseDto = gson.fromJson(inputUserId, BaseDto::class.java)
                 val connectedDto = gson.fromJson(baseDto.payload, ConnectedDto::class.java)
                 connectedDto.id
             }
@@ -195,11 +196,11 @@ class SocketRepository(
         }
     }
 
-    private suspend fun startPings(output: PrintWriter, userId: String) {
+    private fun startPings(output: PrintWriter, userId: String) {
         backgroundScope.launch(Dispatchers.IO) {
             val baseDto = BaseDto(PING, gson.toJson(PingDto(userId)))
             val pingMessage = gson.toJson(baseDto)
-            while (true) {
+            while (isActive) {
                 output.println(pingMessage)
                 output.flush()
                 delay(PING_DELAY)
@@ -207,22 +208,24 @@ class SocketRepository(
         }
     }
 
-    private fun userRequest(output: PrintWriter, userId: String) {
-        backgroundScope.launch(Dispatchers.IO) {
-            val baseDto = BaseDto(GET_USERS, gson.toJson(GetUsersDto(userId)))
-            val getUsersMessage = gson.toJson(baseDto)
-            output.println(getUsersMessage)
+    private fun freeingResources() {
+        runCatching {
+            input.close()
+            output.close()
+            socket.close()
         }
     }
 
-    private suspend fun freeingResources() {
-        runCatching {
-            withContext(NonCancellable) {
-                input.close()
-                output.close()
-                socket.close()
-            }
+    override suspend fun disconnect() {
+        withContext(NonCancellable) {
+            freeingResources()
+            backgroundScope.cancel()
         }
+    }
+
+    private fun error(message: String, throwable: Throwable) {
+        Log.e(TAG, message, throwable)
+        mutableConnectState.value = ConnectState.Error(message)
     }
 
     private fun isEmulator(): Boolean {
@@ -244,19 +247,6 @@ class SocketRepository(
                 || Build.PRODUCT.contains("simulator"))
     }
 
-    override suspend fun disconnect() {
-        backgroundScope.launch(Dispatchers.IO) {
-            runCatching {
-                freeingResources()
-            }.getOrNull()
-            backgroundScope.cancel()
-        }
-    }
-
-    private fun error(message: String, throwable: Throwable) {
-        Log.e(TAG, message, throwable)
-        mutableConnectState.value = ConnectState.Error(message)
-    }
 
     private companion object {
         val TAG: String = SocketRepository::class.java.simpleName
@@ -265,11 +255,13 @@ class SocketRepository(
         const val PORT_BROADCAST = 8888
         const val PORT_SERVER = 6666
 
-        const val TIMEOUT_BROADCAST = 5000L
-        const val TIMEOUT_CONNECT_SERVER = 5000L
-        const val TIMEOUT_GET_UID = 5000L
+        const val TIMEOUT_BROADCAST = 8000
+        const val TIMEOUT_CONNECT_SERVER = 7000
+        const val TIMEOUT_GET_UID = 5000
 
         const val PING_DELAY = 5000L
-        const val USERS_REQUEST_DELAY = 3000L
+        const val USERS_REQUEST_DELAY = 4000L
+
+        const val TIMEOUT_INFINITY = 0
     }
 }

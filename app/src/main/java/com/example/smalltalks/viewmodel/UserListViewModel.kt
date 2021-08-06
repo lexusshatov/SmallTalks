@@ -5,6 +5,7 @@ import com.example.smalltalks.model.repository.base.userlist.UserListContract
 import com.example.smalltalks.model.repository.local.Message
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -12,8 +13,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserListViewModel @Inject constructor(
-    decorator: UserListContract
+    private val decorator: UserListContract
 ) : BaseViewModel() {
+
+    override val data = decorator.users
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -28,5 +31,10 @@ class UserListViewModel @Inject constructor(
         }
     }
 
-    override val data = decorator.users
+    override fun onCleared() {
+        super.onCleared()
+        CoroutineScope(Dispatchers.IO).launch {
+            decorator.disconnect()
+        }
+    }
 }

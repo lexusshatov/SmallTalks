@@ -6,5 +6,4 @@ import kotlinx.coroutines.flow.StateFlow
 interface AuthorizationContract {
     val connectState: StateFlow<ConnectState>
     suspend fun connect(userName: String)
-    suspend fun disconnect()
 }

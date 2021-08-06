@@ -7,4 +7,5 @@ import com.example.smalltalks.model.repository.base.UserContract
 interface RemoteUserListContract: UserContract {
 
     val users: LiveData<List<User>>
+    suspend fun disconnect()
 }
