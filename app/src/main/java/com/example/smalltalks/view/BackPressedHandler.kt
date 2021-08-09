@@ -8,19 +8,19 @@ class BackPressedHandler(
     private val action: () -> Unit,
     private val exit: () -> Unit,
     private val clicksToExit: Int,
-    clickDelay: Long = 1500L
+    private val clickDelay: Long = 1500L
 ) : OnBackPressed, Destroyable {
     private var clickCount = 0
     private val scope = CoroutineScope(Dispatchers.IO) + Job()
 
-    private val job = scope.launch(Dispatchers.IO) {
-        while (isActive) {
-            delay(clickDelay)
-            if (clickCount > 0) clickCount--
-        }
-    }
+    private var job: Job? = null
 
     override fun onBackPressed() {
+        job?.cancel()
+        job = scope.launch(Dispatchers.IO) {
+            delay(clickDelay)
+            clickCount = 0
+        }
         clickCount++
         if (clickCount >= clicksToExit) {
             exit()
@@ -30,6 +30,6 @@ class BackPressedHandler(
     }
 
     override fun destroy() {
-        job.cancel()
+        job?.cancel()
     }
 }
