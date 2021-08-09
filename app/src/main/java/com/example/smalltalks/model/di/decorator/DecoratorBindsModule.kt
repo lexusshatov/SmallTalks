@@ -2,6 +2,7 @@ package com.example.smalltalks.model.di.decorator
 
 import com.example.smalltalks.model.repository.base.authorization.AuthorizationContract
 import com.example.smalltalks.model.repository.base.chat.ChatContract
+import com.example.smalltalks.model.repository.base.repository.PreferencesData
 import com.example.smalltalks.model.repository.base.userlist.UsersContract
 import com.example.smalltalks.model.repository.decorator.RepositoryDecorator
 import dagger.Binds
@@ -26,4 +27,8 @@ interface DecoratorBindsModule {
     @Binds
     @ActivityRetainedScoped
     fun bindUserListDecorator(repositoryDecorator: RepositoryDecorator): UsersContract
+
+    @Binds
+    @ActivityRetainedScoped
+    fun bindPreferencesDecorator(repositoryDecorator: RepositoryDecorator): PreferencesData
 }

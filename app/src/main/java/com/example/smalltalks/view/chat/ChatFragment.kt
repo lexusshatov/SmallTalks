@@ -50,9 +50,9 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
             adapter = this@ChatFragment.adapter
         }
 
-        viewModel.data.observe(viewLifecycleOwner, {
+        viewModel.data.observe(viewLifecycleOwner) {
             adapter.submitList(it)
-        })
+        }
 
         binding.buttonSend.setOnClickListener {
             val message = binding.editMessage.text.toString()

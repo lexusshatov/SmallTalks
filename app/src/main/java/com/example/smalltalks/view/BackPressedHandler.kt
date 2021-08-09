@@ -1,11 +1,13 @@
 package com.example.smalltalks.view
 
-import com.example.smalltalks.model.repository.Destroyable
+import com.example.smalltalks.model.repository.base.Destroyable
 import com.example.smalltalks.view.base.OnBackPressed
 import kotlinx.coroutines.*
 
 class BackPressedHandler(
-    private val actions: HashMap<Int, () -> Unit>,
+    private val action: () -> Unit,
+    private val exit: () -> Unit,
+    private val clicksToExit: Int,
     clickDelay: Long = 1500L
 ) : OnBackPressed, Destroyable {
     private var clickCount = 0
@@ -20,7 +22,11 @@ class BackPressedHandler(
 
     override fun onBackPressed() {
         clickCount++
-        actions[clickCount]?.invoke()
+        if (clickCount >= clicksToExit) {
+            exit()
+        } else {
+            action()
+        }
     }
 
     override fun destroy() {

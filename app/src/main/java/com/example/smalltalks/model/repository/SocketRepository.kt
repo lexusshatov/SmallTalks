@@ -60,7 +60,7 @@ class SocketRepository(
             val userId = getUserIdAsync(socket, input, TIMEOUT_GET_UID)
             me = User(userId, userName)
             connectUser(output, me.id, userName)
-            getUsers(output, me.id)
+            getUsers(me.id)
 
             startPings(output, userId)
             startListening(input)
@@ -209,7 +209,7 @@ class SocketRepository(
         }
     }
 
-    private fun getUsers(output: PrintWriter, userId: String) {
+    private fun getUsers(userId: String) {
         backgroundScope.launch(Dispatchers.IO) {
             while (isActive) {
                 val baseDto = BaseDto(GET_USERS, gson.toJson(GetUsersDto(userId)))

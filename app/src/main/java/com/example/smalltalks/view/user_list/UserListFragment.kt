@@ -1,43 +1,38 @@
 package com.example.smalltalks.view.user_list
 
-import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentUserListBinding
+import com.example.smalltalks.model.repository.base.repository.PreferencesData
 import com.example.smalltalks.view.BackPressedHandler
-import com.example.smalltalks.view.authorization.AuthorizationFragment
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.base.OnBackPressed
 import com.example.smalltalks.view.chat.ChatFragment
 import com.example.smalltalks.viewmodel.UserListViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding>(),
     OnBackPressed {
+
+    @Inject
+    lateinit var preferencesData: PreferencesData
+
     private val backPressedHandler = BackPressedHandler(
-        actions = hashMapOf(
-            1 to { showToast("Click again for logout") },
-            2 to {
-                requireActivity().apply {
-                    getSharedPreferences(
-                        AuthorizationFragment.USER_PREFERENCES,
-                        Context.MODE_PRIVATE
-                    )
-                        .edit {
-                            remove(AuthorizationFragment.USER_NAME)
-                            apply()
-                        }
-                    finish()
-                    startActivity(intent)
-                }
+        action = { showToast("Click again for logout") },
+        exit = {
+            preferencesData.deleteUserName()
+            requireActivity().apply {
+                finish()
+                startActivity(intent)
             }
-        )
+        },
+        clicksToExit = 2
     )
 
 
@@ -62,9 +57,9 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
             adapter = this@UserListFragment.adapter
         }
 
-        viewModel.data.observe(viewLifecycleOwner, { list ->
+        viewModel.data.observe(viewLifecycleOwner) { list ->
             adapter.submitList(list.filter { it.name.isNotEmpty() })
-        })
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -80,7 +75,7 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
         }
         return true
     }
-    
+
     override fun onBackPressed() {
         backPressedHandler.onBackPressed()
     }
