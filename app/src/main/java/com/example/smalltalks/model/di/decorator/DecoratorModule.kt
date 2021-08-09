@@ -1,8 +1,8 @@
 package com.example.smalltalks.model.di.decorator
 
 import com.example.smalltalks.model.repository.decorator.RepositoryDecorator
-import com.example.smalltalks.model.repository.local.LocalData
-import com.example.smalltalks.model.repository.remote.RemoteData
+import com.example.smalltalks.model.repository.base.repository.LocalData
+import com.example.smalltalks.model.repository.base.repository.RemoteData
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

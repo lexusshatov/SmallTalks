@@ -1,6 +1,6 @@
 package com.example.smalltalks.model.di.remote
 
-import com.example.smalltalks.model.repository.remote.SocketRepository
+import com.example.smalltalks.model.repository.SocketRepository
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides

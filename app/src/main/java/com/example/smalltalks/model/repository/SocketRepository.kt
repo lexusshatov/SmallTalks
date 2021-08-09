@@ -1,4 +1,4 @@
-package com.example.smalltalks.model.repository.remote
+package com.example.smalltalks.model.repository
 
 import android.os.Build
 import android.util.Log
@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.smalltalks.model.remote_protocol.*
 import com.example.smalltalks.model.remote_protocol.BaseDto.Action.*
+import com.example.smalltalks.model.repository.base.repository.RemoteData
+import com.example.smalltalks.model.repository.remote.ConnectState
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,8 +32,8 @@ class SocketRepository(
 
     private var timeoutPong = 15000L
 
-    //TODO supervisor job
-    private val backgroundScope = CoroutineScope(Dispatchers.IO) + SupervisorJob()
+    private val job = SupervisorJob()
+    private val backgroundScope = CoroutineScope(Dispatchers.IO) + job
 
     override lateinit var me: User
 
@@ -39,18 +41,7 @@ class SocketRepository(
     override val messages: SharedFlow<MessageDto>
         get() = mutableMessages
 
-    //TODO getUsers()
-    private val mutableUsers by lazy {
-        backgroundScope.launch(Dispatchers.IO) {
-            while (isActive) {
-                val baseDto = BaseDto(GET_USERS, gson.toJson(GetUsersDto(me.id)))
-                val getUsersMessage = gson.toJson(baseDto)
-                output.println(getUsersMessage)
-                delay(USERS_REQUEST_DELAY)
-            }
-        }
-        MutableLiveData<List<User>>()
-    }
+    private val mutableUsers = MutableLiveData<List<User>>()
     override val users: LiveData<List<User>>
         get() = mutableUsers
 
@@ -63,11 +54,13 @@ class SocketRepository(
             mutableConnectState.value = ConnectState.Connect(userName)
 
             val ip = getServerAddress(TIMEOUT_BROADCAST)
+
             //init socket, in/out streams
             connectToServer(ip, TIMEOUT_CONNECT_SERVER)
             val userId = getUserIdAsync(socket, input, TIMEOUT_GET_UID)
             me = User(userId, userName)
-            connectUser(output, userId, userName)
+            connectUser(output, me.id, userName)
+            getUsers(output, me.id)
 
             startPings(output, userId)
             startListening(input)
@@ -131,7 +124,6 @@ class SocketRepository(
     }
 
     private suspend fun getServerAddress(timeout: Int) =
-        //TODO trycatch
         runInterruptible(backgroundScope.coroutineContext) {
             runCatching {
                 if (isEmulator()) EMULATOR_IP
@@ -143,15 +135,19 @@ class SocketRepository(
                         InetAddress.getByName(HOST_BROADCAST),
                         PORT_BROADCAST
                     )
-                    DatagramSocket().apply {
-                        soTimeout = timeout
-                        send(packet)
-                        receive(packet)
-                        close()
-                    }
-                    val message = String(packet.data).trim { it.code == 0 }
-                    val udpDto = gson.fromJson(message, UdpDto::class.java)
 
+                    var message = ""
+                    while (backgroundScope.isActive && message.isEmpty()) {
+                        DatagramSocket().apply {
+                            soTimeout = timeout
+                            send(packet)
+                            receive(packet)
+                            message = String(packet.data).trim { it.code == 0 }
+                            close()
+                        }
+                    }
+
+                    val udpDto = gson.fromJson(message, UdpDto::class.java)
                     udpDto.ip
                 }
             }
@@ -213,6 +209,17 @@ class SocketRepository(
         }
     }
 
+    private fun getUsers(output: PrintWriter, userId: String) {
+        backgroundScope.launch(Dispatchers.IO) {
+            while (isActive) {
+                val baseDto = BaseDto(GET_USERS, gson.toJson(GetUsersDto(userId)))
+                val getUsersMessage = gson.toJson(baseDto)
+                output.println(getUsersMessage)
+                delay(USERS_REQUEST_DELAY)
+            }
+        }
+    }
+
     private fun freeingResources() {
         runCatching {
             input.close()
@@ -260,7 +267,7 @@ class SocketRepository(
         const val PORT_BROADCAST = 8888
         const val PORT_SERVER = 6666
 
-        const val TIMEOUT_BROADCAST = 8000
+        const val TIMEOUT_BROADCAST = 15000
         const val TIMEOUT_CONNECT_SERVER = 7000
         const val TIMEOUT_GET_UID = 5000
 

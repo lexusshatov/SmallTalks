@@ -6,24 +6,40 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentUserListBinding
+import com.example.smalltalks.view.BackPressedHandler
 import com.example.smalltalks.view.authorization.AuthorizationFragment
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.base.OnBackPressed
 import com.example.smalltalks.view.chat.ChatFragment
 import com.example.smalltalks.viewmodel.UserListViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding>(),
     OnBackPressed {
-    private var clickCount = 0
+    private val backPressedHandler = BackPressedHandler(
+        actions = hashMapOf(
+            1 to { showToast("Click again for logout") },
+            2 to {
+                requireActivity().apply {
+                    getSharedPreferences(
+                        AuthorizationFragment.USER_PREFERENCES,
+                        Context.MODE_PRIVATE
+                    )
+                        .edit {
+                            remove(AuthorizationFragment.USER_NAME)
+                            apply()
+                        }
+                    finish()
+                    startActivity(intent)
+                }
+            }
+        )
+    )
+
 
     override val viewModel by viewModels<UserListViewModel>()
     override val viewBindingProvider: (LayoutInflater, ViewGroup?) -> FragmentUserListBinding =
@@ -33,23 +49,13 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
 
     private val adapter by lazy {
         UserListAdapter {
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.frame_container, ChatFragment.newInstance(it))
-                .addToBackStack(null)
-                .commit()
+            navigateToFragment(ChatFragment.newInstance(it), true)
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (requireActivity() as AppCompatActivity).supportActionBar?.title = "Users"
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            while (true) {
-                delay(TIMEOUT_EXIT)
-                if (clickCount > 0) clickCount--
-            }
-        }
 
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -74,30 +80,13 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
         }
         return true
     }
-
-    //TODO BackPressedHandler
+    
     override fun onBackPressed() {
-        clickCount++
-        when (clickCount) {
-            1 -> showToast("Click again for log out")
-            2 -> {
-                activity?.apply {
-                    getSharedPreferences(
-                        AuthorizationFragment.USER_PREFERENCES,
-                        Context.MODE_PRIVATE
-                    )
-                        .edit {
-                            remove(AuthorizationFragment.USER_NAME)
-                            apply()
-                        }
-                    finish()
-                    startActivity(intent)
-                }
-            }
-        }
+        backPressedHandler.onBackPressed()
     }
 
-    companion object {
-        const val TIMEOUT_EXIT = 1500L
+    override fun onDestroy() {
+        super.onDestroy()
+        backPressedHandler.destroy()
     }
 }

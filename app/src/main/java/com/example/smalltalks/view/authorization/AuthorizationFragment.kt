@@ -9,17 +9,12 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentAuthorizationBinding
 import com.example.smalltalks.model.repository.remote.ConnectState
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.user_list.UserListFragment
 import com.example.smalltalks.viewmodel.AuthorizationViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class AuthorizationFragment :
@@ -57,48 +52,29 @@ class AuthorizationFragment :
             }
         }
 
-        lifecycleScope.launchWhenResumed {
-            //lazy init viewModel on main thread
-            val data = viewModel.data
-            withContext(Dispatchers.IO) {
-                data.collect { state ->
-                    withContext(Dispatchers.Main) {
-                        Log.d(TAG, "Connect state: ${state.javaClass.simpleName}")
-                        when (state) {
-                            is ConnectState.Nothing -> {
-                                userName?.let {
-                                    viewModel.connect(it)
-                                }
-                            }
-                            is ConnectState.Connect -> {
-                                binding.buttonLogin.isClickable = false
-                            }
-                            is ConnectState.Success -> {
-                                navigateToUsers()
-                                binding.buttonLogin.isClickable = true
-                            }
-                            is ConnectState.Error -> {
-                                binding.buttonLogin.isClickable = true
-                                showToast(state.message)
-                            }
-                        }
+        viewModel.data.observe(viewLifecycleOwner) { state ->
+            Log.d(TAG, "Connect state: ${state.javaClass.simpleName}")
+            when (state) {
+                is ConnectState.Nothing -> {
+                    userName?.let {
+                        viewModel.connect(it)
                     }
+                }
+                is ConnectState.Connect -> {
+                    binding.buttonLogin.isClickable = false
+                }
+                is ConnectState.Success -> {
+                    navigateToFragment(UserListFragment(), true)
+                    binding.buttonLogin.isClickable = true
+                }
+                is ConnectState.Error -> {
+                    binding.buttonLogin.isClickable = true
+                    showToast(state.message)
                 }
             }
         }
     }
 
-    //TODO BaseFragment
-    private fun navigateToUsers() {
-        requireActivity().supportFragmentManager
-            .beginTransaction()
-            .replace(
-                R.id.frame_container,
-                UserListFragment()
-            )
-            .addToBackStack(null)
-            .commit()
-    }
 
     companion object {
         const val USER_PREFERENCES = "User_preferences"

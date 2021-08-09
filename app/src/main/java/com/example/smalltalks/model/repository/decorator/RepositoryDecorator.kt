@@ -2,9 +2,9 @@ package com.example.smalltalks.model.repository.decorator
 
 import com.example.smalltalks.model.remote_protocol.MessageDto
 import com.example.smalltalks.model.remote_protocol.User
-import com.example.smalltalks.model.repository.local.LocalData
+import com.example.smalltalks.model.repository.base.repository.LocalData
 import com.example.smalltalks.model.repository.local.Message
-import com.example.smalltalks.model.repository.remote.RemoteData
+import com.example.smalltalks.model.repository.base.repository.RemoteData
 import kotlinx.coroutines.flow.Flow
 
 class RepositoryDecorator(
@@ -39,6 +39,6 @@ class RepositoryDecorator(
     override suspend fun saveMessage(message: Message) =
         localRepository.saveMessage(message)
 
-    override fun getDialog(user1: User, user2: User) =
-        localRepository.getDialog(user1, user2)
+    override fun getDialog(receiver: User) =
+        localRepository.getDialog(receiver)
 }

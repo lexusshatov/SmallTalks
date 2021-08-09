@@ -7,10 +7,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
+import com.example.smalltalks.R
 
 abstract class BaseFragment<VM, VB : ViewBinding> : Fragment() {
 
     abstract val viewModel: VM
+    private var toast: Toast? = null
 
     abstract val viewBindingProvider: (LayoutInflater, ViewGroup?) -> VB
     private var bindingInternal: VB? = null
@@ -36,8 +38,22 @@ abstract class BaseFragment<VM, VB : ViewBinding> : Fragment() {
         bindingInternal = null
     }
 
-    //TODO toast
-    protected fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    fun showToast(message: String) {
+        toast?.cancel()
+        toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+        toast?.show()
+    }
+
+    fun navigateToFragment(fragment: Fragment, backstack: Boolean) {
+        val fragmentTransaction = requireActivity().supportFragmentManager
+            .beginTransaction()
+            .replace(
+                R.id.frame_container,
+                fragment
+            )
+        fragmentTransaction.apply {
+            if (backstack) addToBackStack(null)
+            commit()
+        }
     }
 }

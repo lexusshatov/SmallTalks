@@ -17,12 +17,12 @@ import kotlinx.coroutines.launch
 class ChatViewModel @AssistedInject constructor(
     private val decorator: ChatContract,
     @Assisted private val receiver: User
-) : BaseViewModel() {
+) : BaseViewModel<List<Message>>() {
 
     val me = decorator.me
 
     override val data: LiveData<List<Message>>
-        get() = decorator.getDialog(me, receiver)
+        get() = decorator.getDialog(receiver)
 
     fun sendMessage(message: String) {
         viewModelScope.launch(Dispatchers.IO) {

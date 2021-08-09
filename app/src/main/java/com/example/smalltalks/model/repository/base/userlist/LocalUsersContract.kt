@@ -1,8 +1,8 @@
 package com.example.smalltalks.model.repository.base.userlist
 
 import com.example.smalltalks.model.repository.local.Message
-//TODO RENAME
-interface LocalUserListContract {
+
+interface LocalUsersContract {
 
     suspend fun saveMessage(message: Message)
 }

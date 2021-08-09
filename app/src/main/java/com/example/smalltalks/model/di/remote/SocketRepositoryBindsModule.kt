@@ -1,7 +1,7 @@
 package com.example.smalltalks.model.di.remote
 
-import com.example.smalltalks.model.repository.remote.RemoteData
-import com.example.smalltalks.model.repository.remote.SocketRepository
+import com.example.smalltalks.model.repository.base.repository.RemoteData
+import com.example.smalltalks.model.repository.SocketRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

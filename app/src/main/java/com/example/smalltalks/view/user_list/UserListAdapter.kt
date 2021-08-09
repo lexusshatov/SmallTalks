@@ -39,7 +39,6 @@ class UserListAdapter(
         }
     }
 
-    //TODO swap
     private class UserDiffCallback : DiffUtil.ItemCallback<User>() {
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
             return oldItem == newItem

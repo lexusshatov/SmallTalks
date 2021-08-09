@@ -1,7 +1,7 @@
 package com.example.smalltalks.model.di.local
 
-import com.example.smalltalks.model.repository.local.LocalData
-import com.example.smalltalks.model.repository.local.LocalRepository
+import com.example.smalltalks.model.repository.base.repository.LocalData
+import com.example.smalltalks.model.repository.LocalRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
