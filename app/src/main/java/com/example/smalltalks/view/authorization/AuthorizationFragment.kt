@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import com.example.smalltalks.databinding.FragmentAuthorizationBinding
-import com.example.smalltalks.model.repository.base.repository.PreferencesData
-import com.example.smalltalks.model.repository.remote.ConnectState
+import com.example.domain.repository.base.repository.PreferencesData
+import com.example.domain.repository.remote.ConnectState
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.user_list.UserListFragment
 import com.example.smalltalks.viewmodel.AuthorizationViewModel
@@ -21,7 +21,7 @@ class AuthorizationFragment :
     BaseFragment<AuthorizationViewModel, FragmentAuthorizationBinding>() {
 
     @Inject
-    lateinit var preferencesData: PreferencesData
+    lateinit var preferencesData: com.example.domain.repository.base.repository.PreferencesData
     override val viewModel by viewModels<AuthorizationViewModel>()
     override val viewBindingProvider: (LayoutInflater, ViewGroup?) -> FragmentAuthorizationBinding =
         { inflater, container ->
@@ -52,19 +52,19 @@ class AuthorizationFragment :
         viewModel.data.observe(viewLifecycleOwner) { state ->
             Log.d(TAG, "Connect state: ${state.javaClass.simpleName}")
             when (state) {
-                is ConnectState.Nothing -> {
+                is com.example.domain.repository.remote.ConnectState.Nothing -> {
                     userName?.let {
                         viewModel.connect(it)
                     }
                 }
-                is ConnectState.Connect -> {
+                is com.example.domain.repository.remote.ConnectState.Connect -> {
                     binding.buttonLogin.isClickable = false
                 }
-                is ConnectState.Success -> {
+                is com.example.domain.repository.remote.ConnectState.Success -> {
                     navigateToFragment(UserListFragment(), true)
                     binding.buttonLogin.isClickable = true
                 }
-                is ConnectState.Error -> {
+                is com.example.domain.repository.remote.ConnectState.Error -> {
                     binding.buttonLogin.isClickable = true
                     showToast(state.message)
                 }

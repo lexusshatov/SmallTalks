@@ -6,10 +6,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.example.smalltalks.databinding.MyChatItemBinding
 import com.example.smalltalks.databinding.ReceiverChatItemBinding
-import com.example.smalltalks.model.repository.local.Message
+import com.example.domain.repository.local.Message
 
 class ChatAdapter(private val myId: String) :
-    ListAdapter<Message, MultiViewHolder>(UserDiffCallback()) {
+    ListAdapter<com.example.domain.repository.local.Message, MultiViewHolder>(UserDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MultiViewHolder {
         val binding = when (viewType) {
@@ -47,7 +47,7 @@ class ChatAdapter(private val myId: String) :
 
     class MyViewHolder(private val binding: MyChatItemBinding) : MultiViewHolder(binding) {
 
-        override fun bind(myId: String, message: Message) {
+        override fun bind(myId: String, message: com.example.domain.repository.local.Message) {
             binding.apply {
                 chatUserName.text = message.from.name
                 chatMessage.text = message.message
@@ -58,7 +58,7 @@ class ChatAdapter(private val myId: String) :
     class ReceiverViewHolder(private val binding: ReceiverChatItemBinding) :
         MultiViewHolder(binding) {
 
-        override fun bind(myId: String, message: Message) {
+        override fun bind(myId: String, message: com.example.domain.repository.local.Message) {
             binding.apply {
                 chatUserName.text = message.from.name
                 chatMessage.text = message.message
@@ -66,12 +66,12 @@ class ChatAdapter(private val myId: String) :
         }
     }
 
-    private class UserDiffCallback : DiffUtil.ItemCallback<Message>() {
-        override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
+    private class UserDiffCallback : DiffUtil.ItemCallback<com.example.domain.repository.local.Message>() {
+        override fun areItemsTheSame(oldItem: com.example.domain.repository.local.Message, newItem: com.example.domain.repository.local.Message): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {
+        override fun areContentsTheSame(oldItem: com.example.domain.repository.local.Message, newItem: com.example.domain.repository.local.Message): Boolean {
             return oldItem == newItem
         }
     }
