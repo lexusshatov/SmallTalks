@@ -4,12 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
+import com.example.core.base.repository.local.Message
 import com.example.smalltalks.databinding.MyChatItemBinding
 import com.example.smalltalks.databinding.ReceiverChatItemBinding
-import com.example.core.repository.local.Message
 
 class ChatAdapter(private val myId: String) :
-    ListAdapter<com.example.core.repository.local.Message, MultiViewHolder>(UserDiffCallback()) {
+    ListAdapter<Message, MultiViewHolder>(UserDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MultiViewHolder {
         val binding = when (viewType) {
@@ -47,7 +47,7 @@ class ChatAdapter(private val myId: String) :
 
     class MyViewHolder(private val binding: MyChatItemBinding) : MultiViewHolder(binding) {
 
-        override fun bind(myId: String, message: com.example.core.repository.local.Message) {
+        override fun bind(myId: String, message: Message) {
             binding.apply {
                 chatUserName.text = message.from.name
                 chatMessage.text = message.message
@@ -58,7 +58,7 @@ class ChatAdapter(private val myId: String) :
     class ReceiverViewHolder(private val binding: ReceiverChatItemBinding) :
         MultiViewHolder(binding) {
 
-        override fun bind(myId: String, message: com.example.core.repository.local.Message) {
+        override fun bind(myId: String, message: Message) {
             binding.apply {
                 chatUserName.text = message.from.name
                 chatMessage.text = message.message
@@ -66,12 +66,12 @@ class ChatAdapter(private val myId: String) :
         }
     }
 
-    private class UserDiffCallback : DiffUtil.ItemCallback<com.example.core.repository.local.Message>() {
-        override fun areItemsTheSame(oldItem: com.example.core.repository.local.Message, newItem: com.example.core.repository.local.Message): Boolean {
+    private class UserDiffCallback : DiffUtil.ItemCallback<Message>() {
+        override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: com.example.core.repository.local.Message, newItem: com.example.core.repository.local.Message): Boolean {
+        override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {
             return oldItem == newItem
         }
     }

@@ -3,11 +3,12 @@ package com.example.smalltalks.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.core.repository.base.authorization.AuthorizationContract
-import com.example.core.repository.remote.ConnectState
+import com.example.core.base.authorization.AuthorizationContract
+import com.example.core.base.repository.ConnectState
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,8 +17,8 @@ class AuthorizationViewModel @Inject constructor(
     private val decorator: AuthorizationContract
 ) : BaseViewModel<ConnectState>() {
 
-    private val mutableData = MutableLiveData<com.example.core.repository.remote.ConnectState>()
-    override val data: LiveData<com.example.core.repository.remote.ConnectState>
+    private val mutableData = MutableLiveData<ConnectState>()
+    override val data: LiveData<ConnectState>
         get() = mutableData
 
     init {

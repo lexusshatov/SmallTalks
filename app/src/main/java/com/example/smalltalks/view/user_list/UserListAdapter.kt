@@ -5,12 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.core.dto.User
 import com.example.smalltalks.databinding.ListItemBinding
-import com.example.core.remote_protocol.User
 
 class UserListAdapter(
-    private val onClick: (com.example.core.remote_protocol.User) -> Unit
-) : ListAdapter<com.example.core.remote_protocol.User, UserListAdapter.ViewHolder>(UserDiffCallback()) {
+    private val onClick: (User) -> Unit
+) : ListAdapter<User, UserListAdapter.ViewHolder>(UserDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ListItemBinding.inflate(
@@ -29,7 +29,7 @@ class UserListAdapter(
 
     class ViewHolder(private val binding: ListItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(user: com.example.core.remote_protocol.User, onClick: (com.example.core.remote_protocol.User) -> Unit) {
+        fun bind(user: User, onClick: (User) -> Unit) {
             binding.apply {
                 itemContainer.text = user.name
                 itemContainer.setOnClickListener {
@@ -39,12 +39,12 @@ class UserListAdapter(
         }
     }
 
-    private class UserDiffCallback : DiffUtil.ItemCallback<com.example.core.remote_protocol.User>() {
-        override fun areItemsTheSame(oldItem: com.example.core.remote_protocol.User, newItem: com.example.core.remote_protocol.User): Boolean {
+    private class UserDiffCallback : DiffUtil.ItemCallback<User>() {
+        override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
             return oldItem == newItem
         }
 
-        override fun areContentsTheSame(oldItem: com.example.core.remote_protocol.User, newItem: com.example.core.remote_protocol.User): Boolean {
+        override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
             return oldItem.name == newItem.name
         }
     }

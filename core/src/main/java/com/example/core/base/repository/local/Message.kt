@@ -2,7 +2,7 @@ package com.example.core.base.repository.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.natife.example.domain.dto.User
+import com.example.core.dto.User
 
 @Entity
 data class Message(

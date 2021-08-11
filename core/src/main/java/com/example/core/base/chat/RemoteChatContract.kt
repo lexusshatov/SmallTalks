@@ -1,7 +1,7 @@
 package com.example.core.base.chat
 
-import com.example.core.di.decorator.base.UserContract
-import com.natife.example.domain.dto.User
+import com.example.core.dto.User
+import com.example.core.base.UserContract
 
 interface RemoteChatContract : UserContract {
 

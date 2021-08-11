@@ -5,9 +5,9 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.core.dto.User
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentChatBinding
-import com.example.core.remote_protocol.User
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.chat.adapter.ChatAdapter
 import com.example.smalltalks.viewmodel.ChatViewModel
@@ -17,7 +17,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
 
-    private lateinit var receiver: com.example.core.remote_protocol.User
+    private lateinit var receiver: User
 
     @Inject
     lateinit var viewModelFactory: ChatViewModel.Factory
@@ -79,7 +79,7 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
     companion object {
         const val USER_KEY = "user"
 
-        fun newInstance(receiver: com.example.core.remote_protocol.User) = ChatFragment().apply {
+        fun newInstance(receiver: User) = ChatFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(USER_KEY, receiver)
             }

@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.core.remote_protocol.User
-import com.example.core.repository.base.chat.ChatContract
-import com.example.core.repository.local.Message
+import com.example.core.base.chat.ChatContract
+import com.example.core.base.repository.local.Message
+import com.example.core.dto.User
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -15,13 +15,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ChatViewModel @AssistedInject constructor(
-    private val decorator: com.example.core.repository.base.chat.ChatContract,
-    @Assisted private val receiver: com.example.core.remote_protocol.User
-) : BaseViewModel<List<com.example.core.repository.local.Message>>() {
+    private val decorator: ChatContract,
+    @Assisted private val receiver: User
+) : BaseViewModel<List<Message>>() {
 
     val me = decorator.me
 
-    override val data: LiveData<List<com.example.core.repository.local.Message>>
+    override val data: LiveData<List<Message>>
         get() = decorator.getDialog(receiver)
 
     fun sendMessage(message: String) {
@@ -32,13 +32,13 @@ class ChatViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(receiver: com.example.core.remote_protocol.User): ChatViewModel
+        fun create(receiver: User): ChatViewModel
     }
 
     companion object {
         fun provideFactory(
             assistedFactory: Factory,
-            receiver: com.example.core.remote_protocol.User
+            receiver: User
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
