@@ -7,7 +7,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentUserListBinding
-import com.example.domain.repository.base.repository.PreferencesData
+import com.example.core.repository.base.repository.PreferencesData
 import com.example.smalltalks.view.BackPressedHandler
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.base.OnBackPressed
@@ -21,7 +21,7 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
     OnBackPressed {
 
     @Inject
-    lateinit var preferencesData: com.example.domain.repository.base.repository.PreferencesData
+    lateinit var preferencesData: com.example.core.repository.base.repository.PreferencesData
 
     private val backPressedHandler = BackPressedHandler(
         action = { showToast("Click again for logout") },
