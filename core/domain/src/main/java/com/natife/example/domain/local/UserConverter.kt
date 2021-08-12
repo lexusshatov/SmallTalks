@@ -2,8 +2,8 @@ package com.natife.example.domain.local
 
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
-import com.example.core.dto.User
 import com.google.gson.Gson
+import com.natife.example.domain.base.dto.User
 import javax.inject.Inject
 
 @ProvidedTypeConverter

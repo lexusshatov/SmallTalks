@@ -1,11 +1,11 @@
 package com.natife.example.domain.decorator
 
-import com.example.core.dto.User
-import com.example.core.base.repository.RemoteData
-import com.example.core.base.repository.decorator.DataRepository
-import com.example.core.base.repository.local.LocalData
-import com.example.core.base.repository.local.Message
-import com.example.core.dto.MessageDto
+import com.natife.example.domain.base.dto.MessageDto
+import com.natife.example.domain.base.dto.User
+import com.natife.example.domain.base.repository.RemoteData
+import com.natife.example.domain.base.repository.decorator.DataRepository
+import com.natife.example.domain.base.repository.local.LocalData
+import com.natife.example.domain.base.repository.local.Message
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.core.base.chat.ChatContract
-import com.example.core.base.repository.local.Message
-import com.example.core.dto.User
+import com.natife.example.domain.base.chat.ChatContract
+import com.natife.example.domain.base.repository.local.Message
+import com.natife.example.domain.base.dto.User
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

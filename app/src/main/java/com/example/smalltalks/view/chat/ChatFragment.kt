@@ -5,7 +5,7 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.core.dto.User
+import com.natife.example.domain.base.dto.User
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentChatBinding
 import com.example.smalltalks.view.base.BaseFragment

@@ -4,11 +4,11 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.core.base.repository.ConnectState
-import com.example.core.base.repository.RemoteData
-import com.example.core.dto.*
-import com.example.core.dto.BaseDto.Action.*
 import com.google.gson.Gson
+import com.natife.example.domain.base.dto.*
+import com.natife.example.domain.base.dto.BaseDto.Action.*
+import com.natife.example.domain.base.repository.ConnectState
+import com.natife.example.domain.base.repository.RemoteData
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

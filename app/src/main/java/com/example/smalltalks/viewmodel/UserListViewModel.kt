@@ -1,9 +1,9 @@
 package com.example.smalltalks.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.example.core.base.repository.local.Message
-import com.example.core.base.userlist.UsersContract
-import com.example.core.dto.User
+import com.natife.example.domain.base.repository.local.Message
+import com.natife.example.domain.base.userlist.UsersContract
+import com.natife.example.domain.base.dto.User
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope

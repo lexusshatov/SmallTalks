@@ -3,8 +3,8 @@ package com.example.smalltalks.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.core.base.authorization.AuthorizationContract
-import com.example.core.base.repository.ConnectState
+import com.natife.example.domain.base.authorization.AuthorizationContract
+import com.natife.example.domain.base.repository.ConnectState
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

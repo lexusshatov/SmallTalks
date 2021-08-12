@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.core.dto.User
+import com.natife.example.domain.base.dto.User
 import com.example.smalltalks.databinding.ListItemBinding
 
 class UserListAdapter(

@@ -3,11 +3,11 @@ package com.natife.example.domain.repository
 import android.content.Context
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
-import com.example.core.dto.User
-import com.example.core.base.repository.local.LocalData
-import com.example.core.base.repository.local.Message
-import com.example.core.base.repository.local.MessageDao
 import com.google.gson.Gson
+import com.natife.example.domain.base.dto.User
+import com.natife.example.domain.base.repository.local.LocalData
+import com.natife.example.domain.base.repository.local.Message
+import com.natife.example.domain.base.repository.local.MessageDao
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

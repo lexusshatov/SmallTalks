@@ -7,8 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
-import com.example.core.base.repository.ConnectState
-import com.example.core.base.repository.local.PreferencesData
+import com.natife.example.domain.base.repository.ConnectState
+import com.natife.example.domain.base.repository.local.PreferencesData
 import com.example.smalltalks.databinding.FragmentAuthorizationBinding
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.user_list.UserListFragment
