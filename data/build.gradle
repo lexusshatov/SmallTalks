@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'dagger.hilt.android.plugin'
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
 }
@@ -36,9 +35,6 @@ android {
 }
 
 dependencies {
-    //Hilt
-    implementation "com.google.dagger:hilt-android:$hilt_version"
-    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
     //Gson
     implementation "com.google.code.gson:gson:$gson_version"
     //Room

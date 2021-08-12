@@ -4,7 +4,10 @@ import com.example.core.authorization.AuthorizationContract
 import com.example.core.chat.ChatContract
 import com.example.core.repository.local.PreferencesData
 import com.example.core.userlist.UsersContract
-import com.natife.example.domain.decorator.RepositoryDecorator
+import com.natife.example.domain.decorator.AuthRepository
+import com.natife.example.domain.decorator.ChatDecorator
+import com.natife.example.domain.decorator.PreferencesRepository
+import com.natife.example.domain.decorator.UsersRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,17 +20,17 @@ interface DecoratorBindsModule {
 
     @Binds
     @ActivityRetainedScoped
-    fun bindAuthDecorator(repositoryDecorator: RepositoryDecorator): AuthorizationContract
+    fun bindAuthDecorator(authRepository: AuthRepository): AuthorizationContract
 
     @Binds
     @ActivityRetainedScoped
-    fun bindChatDecorator(repositoryDecorator: RepositoryDecorator): ChatContract
+    fun bindChatDecorator(chatDecorator: ChatDecorator): ChatContract
 
     @Binds
     @ActivityRetainedScoped
-    fun bindUserListDecorator(repositoryDecorator: RepositoryDecorator): UsersContract
+    fun bindUsersDecorator(usersRepository: UsersRepository): UsersContract
 
     @Binds
     @ActivityRetainedScoped
-    fun bindPreferencesDecorator(repositoryDecorator: RepositoryDecorator): PreferencesData
+    fun bindPreferencesDecorator(preferencesRepository: PreferencesRepository): PreferencesData
 }

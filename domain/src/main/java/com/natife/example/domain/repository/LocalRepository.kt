@@ -46,6 +46,7 @@ class LocalRepository @Inject constructor(
         return dao.getDialog(receiverJson)
     }
 
+
     companion object {
         const val USER_PREFERENCES = "User_preferences"
         const val USER_NAME = "User_name"
