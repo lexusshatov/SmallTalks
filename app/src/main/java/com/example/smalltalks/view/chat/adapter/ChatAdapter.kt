@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.natife.example.domain.base.repository.local.Message
+import com.example.core.repository.local.Message
 import com.example.smalltalks.databinding.MyChatItemBinding
 import com.example.smalltalks.databinding.ReceiverChatItemBinding
 

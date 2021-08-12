@@ -1,9 +1,9 @@
 package com.example.smalltalks.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.natife.example.domain.base.repository.local.Message
-import com.natife.example.domain.base.userlist.UsersContract
-import com.natife.example.domain.base.dto.User
+import com.example.core.dto.User
+import com.example.core.repository.local.Message
+import com.example.core.userlist.UsersContract
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -14,20 +14,20 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserListViewModel @Inject constructor(
-    private val decorator: UsersContract
+    private val usersRepository: UsersContract
 ) : BaseViewModel<List<User>>() {
 
-    override val data = decorator.users
+    override val data = usersRepository.users
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            decorator.messages.collect {
+            usersRepository.messages.collect {
                 val messageDb = Message(
                     from = it.from,
-                    to = decorator.me,
+                    to = usersRepository.me,
                     message = it.message
                 )
-                decorator.saveMessage(messageDb)
+                usersRepository.saveMessage(messageDb)
             }
         }
     }
@@ -35,7 +35,7 @@ class UserListViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         CoroutineScope(Dispatchers.IO).launch {
-            decorator.disconnect()
+            usersRepository.disconnect()
         }
     }
 }

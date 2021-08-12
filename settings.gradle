@@ -1,4 +1,4 @@
 rootProject.name = "SmallTalks"
 include ':app'
-include ':core'
-include ':core:domain'
+include ':data'
+include ':domain'

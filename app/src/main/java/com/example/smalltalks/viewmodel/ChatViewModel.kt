@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.natife.example.domain.base.chat.ChatContract
-import com.natife.example.domain.base.repository.local.Message
-import com.natife.example.domain.base.dto.User
+import com.example.core.chat.ChatContract
+import com.example.core.dto.User
+import com.example.core.repository.local.Message
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -15,18 +15,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ChatViewModel @AssistedInject constructor(
-    private val decorator: ChatContract,
+    private val chatRepository: ChatContract,
     @Assisted private val receiver: User
 ) : BaseViewModel<List<Message>>() {
 
-    val me = decorator.me
+    val me = chatRepository.me
 
     override val data: LiveData<List<Message>>
-        get() = decorator.getDialog(receiver)
+        get() = chatRepository.getDialog(receiver)
 
     fun sendMessage(message: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            decorator.sendMessage(receiver, message)
+            chatRepository.sendMessage(receiver, message)
         }
     }
 
