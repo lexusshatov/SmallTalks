@@ -20,11 +20,11 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.Socket
-import javax.inject.Inject
 
-class RemoteRepository @Inject constructor(
+class RemoteRepository(
     private val gson: Gson
 ) : AuthorizationRepository, ChatRepository, UsersRepository {
+
     private lateinit var socket: Socket
     private lateinit var input: BufferedReader
     private lateinit var output: PrintWriter

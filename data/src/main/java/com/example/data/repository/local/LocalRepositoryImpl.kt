@@ -8,9 +8,8 @@ import com.natife.example.domain.repository.local.LocalRepository
 import com.natife.example.domain.repository.local.Message
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
-class LocalRepositoryImpl @Inject constructor(
+class LocalRepositoryImpl(
     private val gson: Gson,
     private val dao: MessageDao,
 ) : LocalRepository {

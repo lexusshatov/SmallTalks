@@ -15,7 +15,8 @@ import com.example.smalltalks.viewmodel.UserListViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding>(),
+class UserListFragment :
+    BaseFragment<UserListViewModel, FragmentUserListBinding>(),
     OnBackPressed {
 
     private val backPressedHandler = BackPressedHandler(

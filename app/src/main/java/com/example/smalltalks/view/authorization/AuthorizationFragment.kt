@@ -11,17 +11,13 @@ import com.example.smalltalks.databinding.FragmentAuthorizationBinding
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.user_list.UserListFragment
 import com.example.smalltalks.viewmodel.AuthorizationViewModel
-import com.natife.example.domain.repository.local.PreferencesRepository
 import com.natife.example.domain.repository.remote.ConnectState
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthorizationFragment :
     BaseFragment<AuthorizationViewModel, FragmentAuthorizationBinding>() {
 
-    @Inject
-    lateinit var preferencesRepository: PreferencesRepository
     override val viewModel by viewModels<AuthorizationViewModel>()
     override val viewBindingProvider: (LayoutInflater, ViewGroup?) -> FragmentAuthorizationBinding =
         { inflater, container ->
@@ -29,7 +25,7 @@ class AuthorizationFragment :
         }
 
     private val userName by lazy {
-        preferencesRepository.getUserName()
+        viewModel.getUserName()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,7 +37,7 @@ class AuthorizationFragment :
             buttonLogin.setOnClickListener {
                 val userName = editTextTextPersonName.text.toString()
                 if (userName.isNotEmpty()) {
-                    preferencesRepository.saveUserName(userName)
+                    viewModel.saveUserName(userName)
                     viewModel.connect(userName)
                 } else {
                     showToast("Username must be not empty")

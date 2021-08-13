@@ -57,6 +57,7 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
         binding.buttonSend.setOnClickListener {
             val message = binding.editMessage.text.toString()
             if (message.isNotEmpty()) {
+                binding.editMessage.setText("")
                 viewModel.sendMessage(message)
             }
         }

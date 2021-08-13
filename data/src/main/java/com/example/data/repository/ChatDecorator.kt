@@ -5,9 +5,8 @@ import com.natife.example.domain.dto.User
 import com.natife.example.domain.repository.local.LocalRepository
 import com.natife.example.domain.repository.local.Message
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
-class ChatDecorator @Inject constructor(
+class ChatDecorator(
     private val localRepository: LocalRepository,
     private val socketRepository: ChatRepository
 ) : ChatRepository {

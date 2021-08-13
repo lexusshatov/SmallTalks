@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import com.natife.example.domain.authorization.AuthorizationRepository
+import com.natife.example.domain.repository.local.PreferencesRepository
 import com.natife.example.domain.repository.remote.ConnectState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -13,8 +14,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthorizationViewModel @Inject constructor(
-    private val authRepository: AuthorizationRepository
-) : BaseViewModel<ConnectState>() {
+    private val authRepository: AuthorizationRepository,
+    private val preferencesRepository: PreferencesRepository
+) : BaseViewModel<ConnectState>(), PreferencesRepository by preferencesRepository {
 
     override val data: LiveData<ConnectState>
         get() = mutableData

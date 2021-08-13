@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.smalltalks.di.repository.decorator.Decorator
+import com.example.smalltalks.di.repository.remote.Repository
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import com.natife.example.domain.chat.ChatRepository
 import com.natife.example.domain.dto.User
@@ -17,7 +19,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ChatViewModel @AssistedInject constructor(
-    private val chatRepository: ChatRepository,
+    @Decorator private val chatRepository: ChatRepository,
     private val localRepository: LocalRepository,
     @Assisted private val receiver: User
 ) : BaseViewModel<List<Message>>() {

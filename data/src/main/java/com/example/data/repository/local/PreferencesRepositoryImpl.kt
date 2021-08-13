@@ -9,6 +9,7 @@ import javax.inject.Inject
 class PreferencesRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : PreferencesRepository {
+
     private val preferences = context.getSharedPreferences(
         LocalRepositoryImpl.USER_PREFERENCES,
         Context.MODE_PRIVATE
