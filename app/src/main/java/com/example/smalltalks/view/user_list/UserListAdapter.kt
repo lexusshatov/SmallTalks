@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.natife.example.domain.dto.User
 import com.example.smalltalks.databinding.ListItemBinding
+import com.natife.example.domain.dto.User
 
 class UserListAdapter(
     private val onClick: (User) -> Unit

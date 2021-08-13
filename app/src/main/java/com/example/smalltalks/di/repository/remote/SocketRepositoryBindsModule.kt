@@ -14,5 +14,5 @@ interface SocketRepositoryBindsModule {
 
     @Binds
     @ActivityRetainedScoped
-    fun getAuthorizationContract(repository: SocketRepository) : RemoteData
+    fun getAuthorizationContract(repository: SocketRepository): RemoteData
 }

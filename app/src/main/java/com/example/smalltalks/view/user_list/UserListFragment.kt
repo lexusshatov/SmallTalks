@@ -5,7 +5,6 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.natife.example.domain.repository.local.PreferencesData
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentUserListBinding
 import com.example.smalltalks.view.BackPressedHandler
@@ -13,6 +12,7 @@ import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.base.OnBackPressed
 import com.example.smalltalks.view.chat.ChatFragment
 import com.example.smalltalks.viewmodel.UserListViewModel
+import com.natife.example.domain.repository.local.PreferencesData
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

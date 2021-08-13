@@ -19,7 +19,10 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context, converter: UserConverter): MessageDatabase {
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        converter: UserConverter
+    ): MessageDatabase {
         return Room.databaseBuilder(context, MessageDatabase::class.java, DATABASE_NAME)
             .addTypeConverter(converter)
             .fallbackToDestructiveMigration()

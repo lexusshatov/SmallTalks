@@ -5,12 +5,12 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.natife.example.domain.dto.User
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentChatBinding
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.chat.adapter.ChatAdapter
 import com.example.smalltalks.viewmodel.ChatViewModel
+import com.natife.example.domain.dto.User
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

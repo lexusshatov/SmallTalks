@@ -4,9 +4,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.natife.example.domain.repository.local.Message
 import com.example.smalltalks.databinding.MyChatItemBinding
 import com.example.smalltalks.databinding.ReceiverChatItemBinding
+import com.natife.example.domain.repository.local.Message
 
 class ChatAdapter(private val myId: String) :
     ListAdapter<Message, MultiViewHolder>(UserDiffCallback()) {

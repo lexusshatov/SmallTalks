@@ -4,7 +4,7 @@ import com.natife.example.domain.UserContract
 import com.natife.example.domain.dto.User
 import kotlinx.coroutines.flow.Flow
 
-interface RemoteUsersContract: UserContract {
+interface RemoteUsersContract : UserContract {
 
     val users: Flow<List<User>>
     suspend fun disconnect()

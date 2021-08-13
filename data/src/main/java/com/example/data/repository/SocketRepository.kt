@@ -84,7 +84,8 @@ class SocketRepository @Inject constructor(
                         gson.fromJson(runInterruptible { input.readLine() }, BaseDto::class.java)
                     when (baseDto.action) {
                         NEW_MESSAGE -> {
-                            val newMessageDto = gson.fromJson(baseDto.payload, MessageDto::class.java)
+                            val newMessageDto =
+                                gson.fromJson(baseDto.payload, MessageDto::class.java)
                             val message = Message(
                                 from = newMessageDto.from,
                                 to = me,
@@ -93,7 +94,8 @@ class SocketRepository @Inject constructor(
                             mutableMessages.emit(message)
                         }
                         USERS_RECEIVED -> {
-                            val usersReceivedDto = gson.fromJson(baseDto.payload, UsersReceivedDto::class.java)
+                            val usersReceivedDto =
+                                gson.fromJson(baseDto.payload, UsersReceivedDto::class.java)
                             mutableUsers.emit(usersReceivedDto.users)
                         }
                         PONG -> {

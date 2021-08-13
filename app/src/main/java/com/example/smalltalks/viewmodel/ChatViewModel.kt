@@ -1,10 +1,13 @@
 package com.example.smalltalks.viewmodel
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.smalltalks.viewmodel.base.BaseViewModel
 import com.natife.example.domain.chat.ChatContract
 import com.natife.example.domain.dto.User
 import com.natife.example.domain.repository.local.Message
-import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
