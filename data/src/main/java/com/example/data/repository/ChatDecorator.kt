@@ -1,4 +1,4 @@
-package com.example.data.decorator
+package com.example.data.repository
 
 import com.natife.example.domain.chat.ChatContract
 import com.natife.example.domain.dto.User

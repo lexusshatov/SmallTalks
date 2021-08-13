@@ -1,9 +1,9 @@
-package com.example.data.repository
+package com.example.data.repository.local
 
 import android.content.Context
 import androidx.core.content.edit
-import com.example.data.repository.local.MessageDao
-import com.example.data.repository.local.MessageDb
+import com.example.data.repository.local.data.MessageDao
+import com.example.data.repository.local.data.MessageDb
 import com.google.gson.Gson
 import com.natife.example.domain.dto.User
 import com.natife.example.domain.repository.local.LocalData

@@ -1,6 +1,6 @@
 package com.example.smalltalks.di.repository.remote
 
-import com.example.data.repository.SocketRepository
+import com.example.data.repository.remote.SocketRepository
 import com.natife.example.domain.repository.remote.RemoteData
 import dagger.Binds
 import dagger.Module

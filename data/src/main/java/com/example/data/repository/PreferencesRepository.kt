@@ -1,4 +1,4 @@
-package com.example.data.decorator
+package com.example.data.repository
 
 import com.natife.example.domain.repository.local.LocalData
 import com.natife.example.domain.repository.local.PreferencesData

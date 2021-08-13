@@ -1,4 +1,4 @@
-package com.example.data.repository
+package com.example.data.repository.remote
 
 import android.os.Build
 import android.util.Log

@@ -1,6 +1,6 @@
 package com.example.smalltalks.di.repository.local
 
-import com.example.data.repository.LocalRepository
+import com.example.data.repository.local.LocalRepository
 import com.natife.example.domain.repository.local.LocalData
 import dagger.Binds
 import dagger.Module

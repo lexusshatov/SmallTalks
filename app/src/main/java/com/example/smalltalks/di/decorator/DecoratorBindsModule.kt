@@ -1,9 +1,9 @@
 package com.example.smalltalks.di.decorator
 
-import com.example.data.decorator.AuthRepository
-import com.example.data.decorator.ChatDecorator
-import com.example.data.decorator.PreferencesRepository
-import com.example.data.decorator.UsersRepository
+import com.example.data.repository.AuthRepository
+import com.example.data.repository.ChatDecorator
+import com.example.data.repository.PreferencesRepository
+import com.example.data.repository.UsersRepository
 import com.natife.example.domain.authorization.AuthorizationContract
 import com.natife.example.domain.chat.ChatContract
 import com.natife.example.domain.repository.local.PreferencesData
