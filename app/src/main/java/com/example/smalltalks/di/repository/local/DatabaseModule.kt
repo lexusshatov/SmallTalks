@@ -2,8 +2,8 @@ package com.example.smalltalks.di.repository.local
 
 import android.content.Context
 import androidx.room.Room
-import com.natife.example.domain.local.MessageDatabase
-import com.natife.example.domain.local.UserConverter
+import com.example.data.repository.local.MessageDatabase
+import com.example.data.repository.local.UserConverter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

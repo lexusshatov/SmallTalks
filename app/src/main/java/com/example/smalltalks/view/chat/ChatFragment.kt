@@ -5,7 +5,7 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.core.dto.User
+import com.natife.example.domain.dto.User
 import com.example.smalltalks.R
 import com.example.smalltalks.databinding.FragmentChatBinding
 import com.example.smalltalks.view.base.BaseFragment
@@ -35,7 +35,7 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        receiver = arguments?.getParcelable(USER_KEY)!!
+        receiver = arguments?.getSerializable(USER_KEY) as User
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -76,12 +76,13 @@ class ChatFragment : BaseFragment<ChatViewModel, FragmentChatBinding>() {
         return true
     }
 
+
     companion object {
         const val USER_KEY = "user"
 
         fun newInstance(receiver: User) = ChatFragment().apply {
             arguments = Bundle().apply {
-                putParcelable(USER_KEY, receiver)
+                putSerializable(USER_KEY, receiver)
             }
         }
     }

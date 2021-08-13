@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.example.core.repository.local.Message
+import com.natife.example.domain.repository.local.Message
 import com.example.smalltalks.databinding.MyChatItemBinding
 import com.example.smalltalks.databinding.ReceiverChatItemBinding
 
@@ -68,7 +68,7 @@ class ChatAdapter(private val myId: String) :
 
     private class UserDiffCallback : DiffUtil.ItemCallback<Message>() {
         override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
-            return oldItem.id == newItem.id
+            return false
         }
 
         override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {

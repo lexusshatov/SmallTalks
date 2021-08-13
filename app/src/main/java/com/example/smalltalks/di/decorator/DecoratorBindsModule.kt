@@ -1,13 +1,13 @@
 package com.example.smalltalks.di.decorator
 
-import com.example.core.authorization.AuthorizationContract
-import com.example.core.chat.ChatContract
-import com.example.core.repository.local.PreferencesData
-import com.example.core.userlist.UsersContract
-import com.natife.example.domain.decorator.AuthRepository
-import com.natife.example.domain.decorator.ChatDecorator
-import com.natife.example.domain.decorator.PreferencesRepository
-import com.natife.example.domain.decorator.UsersRepository
+import com.natife.example.domain.authorization.AuthorizationContract
+import com.natife.example.domain.chat.ChatContract
+import com.natife.example.domain.repository.local.PreferencesData
+import com.natife.example.domain.userlist.UsersContract
+import com.example.data.decorator.AuthRepository
+import com.example.data.decorator.ChatDecorator
+import com.example.data.decorator.PreferencesRepository
+import com.example.data.decorator.UsersRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

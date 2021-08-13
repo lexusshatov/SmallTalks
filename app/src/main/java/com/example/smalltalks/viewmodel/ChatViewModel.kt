@@ -1,17 +1,15 @@
 package com.example.smalltalks.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.example.core.chat.ChatContract
-import com.example.core.dto.User
-import com.example.core.repository.local.Message
+import androidx.lifecycle.*
+import com.natife.example.domain.chat.ChatContract
+import com.natife.example.domain.dto.User
+import com.natife.example.domain.repository.local.Message
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ChatViewModel @AssistedInject constructor(
@@ -22,7 +20,16 @@ class ChatViewModel @AssistedInject constructor(
     val me = chatRepository.me
 
     override val data: LiveData<List<Message>>
-        get() = chatRepository.getDialog(receiver)
+        get() = mutableData
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            chatRepository.getDialog(receiver).collect {
+                println(it)
+                mutableData.postValue(it)
+            }
+        }
+    }
 
     fun sendMessage(message: String) {
         viewModelScope.launch(Dispatchers.IO) {

@@ -7,12 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
-import com.example.core.repository.ConnectState
-import com.example.core.repository.local.PreferencesData
 import com.example.smalltalks.databinding.FragmentAuthorizationBinding
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.user_list.UserListFragment
 import com.example.smalltalks.viewmodel.AuthorizationViewModel
+import com.natife.example.domain.repository.local.PreferencesData
+import com.natife.example.domain.repository.remote.ConnectState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

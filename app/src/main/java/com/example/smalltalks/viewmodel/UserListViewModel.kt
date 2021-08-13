@@ -1,10 +1,10 @@
 package com.example.smalltalks.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import com.example.core.dto.User
-import com.example.core.repository.local.Message
-import com.example.core.userlist.UsersContract
 import com.example.smalltalks.viewmodel.base.BaseViewModel
+import com.natife.example.domain.dto.User
+import com.natife.example.domain.userlist.UsersContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,17 +17,19 @@ class UserListViewModel @Inject constructor(
     private val usersRepository: UsersContract
 ) : BaseViewModel<List<User>>() {
 
-    override val data = usersRepository.users
+    override val data: LiveData<List<User>>
+        get() = mutableData
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            usersRepository.users.collect {
+                mutableData.postValue(it)
+            }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
             usersRepository.messages.collect {
-                val messageDb = Message(
-                    from = it.from,
-                    to = usersRepository.me,
-                    message = it.message
-                )
-                usersRepository.saveMessage(messageDb)
+                usersRepository.saveMessage(it)
             }
         }
     }
