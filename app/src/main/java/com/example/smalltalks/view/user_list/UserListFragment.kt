@@ -12,21 +12,16 @@ import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.base.OnBackPressed
 import com.example.smalltalks.view.chat.ChatFragment
 import com.example.smalltalks.viewmodel.UserListViewModel
-import com.natife.example.domain.repository.local.PreferencesData
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding>(),
     OnBackPressed {
 
-    @Inject
-    lateinit var preferencesData: PreferencesData
-
     private val backPressedHandler = BackPressedHandler(
         action = { showToast("Click again for logout") },
         exit = {
-            preferencesData.deleteUserName()
+            viewModel.deleteUserName()
             requireActivity().apply {
                 finish()
                 startActivity(intent)
@@ -34,7 +29,6 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
         },
         clicksToExit = 2
     )
-
 
     override val viewModel by viewModels<UserListViewModel>()
     override val viewBindingProvider: (LayoutInflater, ViewGroup?) -> FragmentUserListBinding =
@@ -82,6 +76,6 @@ class UserListFragment : BaseFragment<UserListViewModel, FragmentUserListBinding
 
     override fun onDestroy() {
         super.onDestroy()
-        backPressedHandler.destroy()
+        backPressedHandler.close()
     }
 }

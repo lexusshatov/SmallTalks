@@ -1,15 +1,15 @@
 package com.example.smalltalks.view
 
-import com.example.smalltalks.view.base.Destroyable
 import com.example.smalltalks.view.base.OnBackPressed
 import kotlinx.coroutines.*
+import java.io.Closeable
 
 class BackPressedHandler(
     private val action: () -> Unit,
     private val exit: () -> Unit,
     private val clicksToExit: Int,
     private val clickDelay: Long = 1500L
-) : OnBackPressed, Destroyable {
+) : OnBackPressed, Closeable {
     private var clickCount = 0
     private val scope = CoroutineScope(Dispatchers.IO) + Job()
 
@@ -29,7 +29,7 @@ class BackPressedHandler(
         }
     }
 
-    override fun destroy() {
+    override fun close() {
         job?.cancel()
     }
 }

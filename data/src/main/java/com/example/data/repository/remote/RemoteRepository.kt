@@ -3,11 +3,13 @@ package com.example.data.repository.remote
 import android.os.Build
 import android.util.Log
 import com.google.gson.Gson
+import com.natife.example.domain.authorization.AuthorizationRepository
+import com.natife.example.domain.chat.ChatRepository
 import com.natife.example.domain.dto.*
 import com.natife.example.domain.dto.BaseDto.Action.*
 import com.natife.example.domain.repository.local.Message
 import com.natife.example.domain.repository.remote.ConnectState
-import com.natife.example.domain.repository.remote.RemoteData
+import com.natife.example.domain.userlist.UsersRepository
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.BufferedReader
@@ -20,9 +22,9 @@ import java.net.InetAddress
 import java.net.Socket
 import javax.inject.Inject
 
-class SocketRepository @Inject constructor(
+class RemoteRepository @Inject constructor(
     private val gson: Gson
-) : RemoteData {
+) : AuthorizationRepository, ChatRepository, UsersRepository {
     private lateinit var socket: Socket
     private lateinit var input: BufferedReader
     private lateinit var output: PrintWriter
@@ -272,7 +274,7 @@ class SocketRepository @Inject constructor(
 
 
     private companion object {
-        val TAG: String = SocketRepository::class.java.simpleName
+        val TAG: String = RemoteRepository::class.java.simpleName
         const val EMULATOR_IP = "10.0.2.2"
         const val HOST_BROADCAST = "255.255.255.255"
         const val PORT_BROADCAST = 8888

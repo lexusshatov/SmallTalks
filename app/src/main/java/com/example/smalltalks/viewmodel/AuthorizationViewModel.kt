@@ -3,7 +3,7 @@ package com.example.smalltalks.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.viewmodel.base.BaseViewModel
-import com.natife.example.domain.authorization.AuthorizationContract
+import com.natife.example.domain.authorization.AuthorizationRepository
 import com.natife.example.domain.repository.remote.ConnectState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthorizationViewModel @Inject constructor(
-    private val authRepository: AuthorizationContract
+    private val authRepository: AuthorizationRepository
 ) : BaseViewModel<ConnectState>() {
 
     override val data: LiveData<ConnectState>

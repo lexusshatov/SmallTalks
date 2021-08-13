@@ -1,17 +1,16 @@
 package com.example.data.repository
 
-import com.natife.example.domain.chat.ChatContract
+import com.natife.example.domain.chat.ChatRepository
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.repository.local.LocalData
+import com.natife.example.domain.repository.local.LocalRepository
 import com.natife.example.domain.repository.local.Message
-import com.natife.example.domain.repository.remote.RemoteData
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ChatDecorator @Inject constructor(
-    private val localRepository: LocalData,
-    private val socketRepository: RemoteData
-) : ChatContract {
+    private val localRepository: LocalRepository,
+    private val socketRepository: ChatRepository
+) : ChatRepository {
 
     override val me
         get() = socketRepository.me
@@ -27,6 +26,4 @@ class ChatDecorator @Inject constructor(
         localRepository.saveMessage(messageDb)
         socketRepository.sendMessage(to, message)
     }
-
-    override fun getDialog(receiver: User) = localRepository.getDialog(receiver)
 }
