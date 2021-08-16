@@ -1,6 +1,6 @@
 package com.example.smalltalks.di.repository.local
 
-import com.example.data.repository.local.LocalRepositoryImpl
+import com.example.data.repository.local.DialogRepositoryImpl
 import com.example.data.repository.local.data.MessageDao
 import com.google.gson.Gson
 import dagger.Module
@@ -15,5 +15,5 @@ class LocalRepositoryModule {
 
     @Provides
     @Singleton
-    fun provideLocalRepository(gson: Gson, dao: MessageDao) = LocalRepositoryImpl(gson, dao)
+    fun provideLocalRepository(gson: Gson, dao: MessageDao) = DialogRepositoryImpl(gson, dao)
 }

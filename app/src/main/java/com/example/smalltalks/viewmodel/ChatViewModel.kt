@@ -5,11 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.di.repository.decorator.Decorator
-import com.example.smalltalks.di.repository.remote.Repository
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import com.natife.example.domain.chat.ChatRepository
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.repository.local.LocalRepository
+import com.natife.example.domain.repository.local.DialogRepository
 import com.natife.example.domain.repository.local.Message
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -20,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class ChatViewModel @AssistedInject constructor(
     @Decorator private val chatRepository: ChatRepository,
-    private val localRepository: LocalRepository,
+    private val dialogRepository: DialogRepository,
     @Assisted private val receiver: User
 ) : BaseViewModel<List<Message>>() {
 
@@ -31,7 +30,7 @@ class ChatViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            localRepository.getDialog(receiver).collect {
+            dialogRepository.getDialog(receiver).collect {
                 mutableData.postValue(it)
             }
         }

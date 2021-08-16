@@ -2,8 +2,7 @@ package com.example.smalltalks.di.repository.decorator
 
 import com.example.data.repository.ChatDecorator
 import com.example.data.repository.remote.RemoteRepository
-import com.example.smalltalks.di.repository.remote.Repository
-import com.natife.example.domain.repository.local.LocalRepository
+import com.natife.example.domain.repository.local.DialogRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +15,6 @@ class DecoratorModule {
 
     @Provides
     @Singleton
-    fun provideDecorator(localRepository: LocalRepository, remoteRepository: RemoteRepository) =
-        ChatDecorator(localRepository, remoteRepository)
+    fun provideDecorator(dialogRepository: DialogRepository, remoteRepository: RemoteRepository) =
+        ChatDecorator(dialogRepository, remoteRepository)
 }

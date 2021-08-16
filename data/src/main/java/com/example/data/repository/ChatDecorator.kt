@@ -2,12 +2,12 @@ package com.example.data.repository
 
 import com.natife.example.domain.chat.ChatRepository
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.repository.local.LocalRepository
+import com.natife.example.domain.repository.local.DialogRepository
 import com.natife.example.domain.repository.local.Message
 import kotlinx.coroutines.flow.Flow
 
 class ChatDecorator(
-    private val localRepository: LocalRepository,
+    private val dialogRepository: DialogRepository,
     private val socketRepository: ChatRepository
 ) : ChatRepository {
 
@@ -22,7 +22,7 @@ class ChatDecorator(
             to = to,
             message = message
         )
-        localRepository.saveMessage(messageDb)
+        dialogRepository.saveMessage(messageDb)
         socketRepository.sendMessage(to, message)
     }
 }

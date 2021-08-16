@@ -15,7 +15,7 @@ const val DATABASE_NAME = "MessageDatabase"
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DatabaseModule {
+class DatabaseModule {
 
     @Provides
     @Singleton
