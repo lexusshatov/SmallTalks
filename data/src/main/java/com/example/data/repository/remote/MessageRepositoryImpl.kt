@@ -2,11 +2,11 @@ package com.example.data.repository.remote
 
 import com.google.gson.Gson
 import com.natife.example.domain.Message
-import com.natife.example.domain.chat.MessageRepository
+import com.natife.example.domain.remote.MessageRepository
 import com.natife.example.domain.dto.BaseDto
 import com.natife.example.domain.dto.SendMessageDto
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.userlist.UsersRepository
+import com.natife.example.domain.remote.UsersRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

@@ -1,4 +1,4 @@
-package com.example.smalltalks.view.user_list
+package com.example.smalltalks.view.userlist
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

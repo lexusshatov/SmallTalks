@@ -3,12 +3,12 @@ package com.example.smalltalks.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.viewmodel.base.BaseViewModel
-import com.natife.example.domain.authorization.AuthorizationRepository
-import com.natife.example.domain.chat.MessageRepository
+import com.natife.example.domain.remote.AuthorizationRepository
+import com.natife.example.domain.remote.MessageRepository
 import com.natife.example.domain.dto.User
 import com.natife.example.domain.local.DialogRepository
 import com.natife.example.domain.local.PreferencesRepository
-import com.natife.example.domain.userlist.UsersRepository
+import com.natife.example.domain.remote.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

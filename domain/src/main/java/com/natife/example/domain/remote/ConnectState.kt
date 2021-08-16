@@ -1,4 +1,4 @@
-package com.natife.example.domain
+package com.natife.example.domain.remote
 
 sealed class ConnectState {
 

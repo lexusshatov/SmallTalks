@@ -1,4 +1,4 @@
-package com.natife.example.domain.userlist
+package com.natife.example.domain.remote
 
 import com.natife.example.domain.dto.User
 import kotlinx.coroutines.flow.Flow

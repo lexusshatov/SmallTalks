@@ -1,10 +1,10 @@
 package com.example.data.repository
 
 import com.natife.example.domain.Message
-import com.natife.example.domain.chat.MessageRepository
+import com.natife.example.domain.remote.MessageRepository
 import com.natife.example.domain.dto.User
 import com.natife.example.domain.local.DialogRepository
-import com.natife.example.domain.userlist.UsersRepository
+import com.natife.example.domain.remote.UsersRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

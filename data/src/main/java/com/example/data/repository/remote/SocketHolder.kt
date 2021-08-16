@@ -226,7 +226,6 @@ class SocketHolder @Inject constructor(private val gson: Gson) {
                 || Build.PRODUCT.contains("simulator"))
     }
 
-
     private companion object {
         val TAG: String = SocketHolder::class.java.simpleName
         const val EMULATOR_IP = "10.0.2.2"

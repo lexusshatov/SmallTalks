@@ -1,6 +1,5 @@
-package com.natife.example.domain.authorization
+package com.natife.example.domain.remote
 
-import com.natife.example.domain.ConnectState
 import kotlinx.coroutines.flow.StateFlow
 
 interface AuthorizationRepository {

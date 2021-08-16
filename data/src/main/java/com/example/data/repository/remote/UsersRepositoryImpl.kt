@@ -1,7 +1,7 @@
 package com.example.data.repository.remote
 
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.userlist.UsersRepository
+import com.natife.example.domain.remote.UsersRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

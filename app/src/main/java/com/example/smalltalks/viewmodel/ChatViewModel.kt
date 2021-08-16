@@ -7,10 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.di.repository.decorator.Decorator
 import com.example.smalltalks.viewmodel.base.BaseViewModel
 import com.natife.example.domain.Message
-import com.natife.example.domain.chat.MessageRepository
+import com.natife.example.domain.remote.MessageRepository
 import com.natife.example.domain.dto.User
 import com.natife.example.domain.local.DialogRepository
-import com.natife.example.domain.userlist.UsersRepository
+import com.natife.example.domain.remote.UsersRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
