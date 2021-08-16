@@ -1,6 +1,6 @@
 package com.example.smalltalks.di.repository.remote
 
-import com.example.data.repository.remote.RemoteRepository
+import com.example.data.repository.remote.SocketHolder
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -10,9 +10,9 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class RemoteRepositoryModule {
+class SocketModule {
 
     @Provides
     @Singleton
-    fun provideRemoteRepository(gson: Gson) = RemoteRepository(gson)
+    fun provideSocketHolder(gson: Gson) = SocketHolder(gson)
 }

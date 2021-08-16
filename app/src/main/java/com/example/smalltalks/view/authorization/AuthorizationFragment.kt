@@ -11,7 +11,7 @@ import com.example.smalltalks.databinding.FragmentAuthorizationBinding
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.user_list.UserListFragment
 import com.example.smalltalks.viewmodel.AuthorizationViewModel
-import com.natife.example.domain.repository.remote.ConnectState
+import com.natife.example.domain.ConnectState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -37,6 +37,7 @@ class AuthorizationFragment :
             buttonLogin.setOnClickListener {
                 val userName = editTextTextPersonName.text.toString()
                 if (userName.isNotEmpty()) {
+                    binding.buttonLogin.isClickable = false
                     viewModel.saveUserName(userName)
                     viewModel.connect(userName)
                 } else {

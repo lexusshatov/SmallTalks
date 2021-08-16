@@ -1,4 +1,4 @@
-package com.natife.example.domain.repository.local
+package com.natife.example.domain
 
 import com.natife.example.domain.dto.User
 

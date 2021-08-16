@@ -6,10 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.di.repository.decorator.Decorator
 import com.example.smalltalks.viewmodel.base.BaseViewModel
-import com.natife.example.domain.chat.ChatRepository
+import com.natife.example.domain.Message
+import com.natife.example.domain.chat.MessageRepository
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.repository.local.DialogRepository
-import com.natife.example.domain.repository.local.Message
+import com.natife.example.domain.local.DialogRepository
+import com.natife.example.domain.userlist.UsersRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -18,12 +19,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ChatViewModel @AssistedInject constructor(
-    @Decorator private val chatRepository: ChatRepository,
+    @Decorator private val messageRepository: MessageRepository,
     private val dialogRepository: DialogRepository,
+    usersRepository: UsersRepository,
     @Assisted private val receiver: User
 ) : BaseViewModel<List<Message>>() {
 
-    val me = chatRepository.me
+    val me = usersRepository.me
 
     override val data: LiveData<List<Message>>
         get() = mutableData
@@ -38,7 +40,7 @@ class ChatViewModel @AssistedInject constructor(
 
     fun sendMessage(message: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            chatRepository.sendMessage(receiver, message)
+            messageRepository.sendMessage(receiver, message)
         }
     }
 

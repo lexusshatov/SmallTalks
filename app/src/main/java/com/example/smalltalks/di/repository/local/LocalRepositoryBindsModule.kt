@@ -1,8 +1,9 @@
 package com.example.smalltalks.di.repository.local
 
 import com.example.data.repository.local.DialogRepositoryImpl
-import com.natife.example.domain.repository.local.DialogRepository
-import com.natife.example.domain.repository.local.SaveRepository
+import com.example.data.repository.local.PreferencesRepositoryImpl
+import com.natife.example.domain.local.DialogRepository
+import com.natife.example.domain.local.PreferencesRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,9 +16,10 @@ interface LocalRepositoryBindsModule {
 
     @Binds
     @Singleton
-    fun localRepository(localRepository: DialogRepositoryImpl): DialogRepository
+    fun bindPreferencesRepository(preferencesRepositoryImpl: PreferencesRepositoryImpl)
+            : PreferencesRepository
 
     @Binds
     @Singleton
-    fun saveRepository(localRepository: DialogRepositoryImpl): SaveRepository
+    fun bindDialogRepository(dialogRepositoryImpl: DialogRepositoryImpl): DialogRepository
 }

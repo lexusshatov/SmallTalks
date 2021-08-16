@@ -1,4 +1,4 @@
-package com.natife.example.domain.repository.remote
+package com.natife.example.domain
 
 sealed class ConnectState {
 

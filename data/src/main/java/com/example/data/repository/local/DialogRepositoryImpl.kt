@@ -1,26 +1,23 @@
 package com.example.data.repository.local
 
 import com.example.data.repository.local.data.MessageDao
-import com.example.data.repository.local.data.MessageDb
+import com.example.data.repository.local.data.toDatabase
+import com.example.data.repository.local.data.toMessage
 import com.google.gson.Gson
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.repository.local.DialogRepository
-import com.natife.example.domain.repository.local.Message
+import com.natife.example.domain.local.DialogRepository
+import com.natife.example.domain.Message
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class DialogRepositoryImpl(
+class DialogRepositoryImpl @Inject constructor(
     private val gson: Gson,
     private val dao: MessageDao,
 ) : DialogRepository {
 
     override suspend fun saveMessage(message: Message) {
-        val messageDb = MessageDb(
-            from = message.from,
-            to = message.to,
-            message = message.message
-        )
-        dao.addMessage(messageDb)
+        dao.addMessage(message.toDatabase())
     }
 
     override fun getDialog(receiver: User): Flow<List<Message>> {
@@ -28,11 +25,7 @@ class DialogRepositoryImpl(
         return dao.getDialog(receiverJson)
             .map { list ->
                 list.map {
-                    Message(
-                        from = it.from,
-                        to = it.to,
-                        message = it.message
-                    )
+                    it.toMessage()
                 }
             }
     }

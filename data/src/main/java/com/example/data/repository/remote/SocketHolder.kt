@@ -3,15 +3,10 @@ package com.example.data.repository.remote
 import android.os.Build
 import android.util.Log
 import com.google.gson.Gson
-import com.natife.example.domain.authorization.AuthorizationRepository
-import com.natife.example.domain.chat.ChatRepository
+import com.natife.example.domain.Message
 import com.natife.example.domain.dto.*
-import com.natife.example.domain.dto.BaseDto.Action.*
-import com.natife.example.domain.repository.local.Message
-import com.natife.example.domain.repository.remote.ConnectState
-import com.natife.example.domain.userlist.UsersRepository
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -20,57 +15,35 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.Socket
+import javax.inject.Inject
 
-class RemoteRepository(
-    private val gson: Gson
-) : AuthorizationRepository, ChatRepository, UsersRepository {
+class SocketHolder @Inject constructor(private val gson: Gson) {
 
     private lateinit var socket: Socket
     private lateinit var input: BufferedReader
     private lateinit var output: PrintWriter
 
     private var timeoutPong = 15000L
-
     private val job = SupervisorJob()
     private val backgroundScope = CoroutineScope(Dispatchers.IO) + job
 
-    override lateinit var me: User
+    lateinit var me: User
+    val messages = MutableSharedFlow<Message>()
+    val users = MutableSharedFlow<List<User>>()
 
-    private val mutableMessages = MutableSharedFlow<Message>()
-    override val messages: SharedFlow<Message>
-        get() = mutableMessages
-
-    private val mutableUsers = MutableSharedFlow<List<User>>()
-    override val users: Flow<List<User>>
-        get() = mutableUsers
-
-    private val mutableConnectState = MutableStateFlow<ConnectState>(ConnectState.Nothing)
-    override val connectState: StateFlow<ConnectState>
-        get() = mutableConnectState
-
-    override suspend fun connect(userName: String) {
-        runCatching {
-            mutableConnectState.value = ConnectState.Connect(userName)
-
-            val ip = getServerAddress(TIMEOUT_BROADCAST)
-
-            //init socket, in/out streams
-            connectToServer(ip, TIMEOUT_CONNECT_SERVER)
-            val userId = getUserIdAsync(socket, input, TIMEOUT_GET_UID)
-            me = User(userId, userName)
-            connectUser(output, me.id, userName)
-            getUsers(me.id)
-
-            startPings(output, userId)
-            startListening(input)
-        }
-            .onSuccess { mutableConnectState.value = ConnectState.Success }
-            .onFailure {
-                freeingResources()
-            }
+    suspend fun connect(userName: String) {
+        val ip = getServerAddress(TIMEOUT_BROADCAST)
+        //init socket, in/out streams
+        connectToServer(ip, TIMEOUT_CONNECT_SERVER)
+        val userId = getUserId(TIMEOUT_GET_UID)
+        me = User(userId, userName)
+        connectUser(me.id, userName)
+        getUsers(me.id)
+        startPings(userId)
+        startListening()
     }
 
-    private fun startListening(input: BufferedReader) {
+    private fun startListening() {
         backgroundScope.launch(Dispatchers.IO) {
             while (timeoutPong > 0 && isActive) {
                 val delayTime = 1000L
@@ -85,7 +58,7 @@ class RemoteRepository(
                     val baseDto =
                         gson.fromJson(runInterruptible { input.readLine() }, BaseDto::class.java)
                     when (baseDto.action) {
-                        NEW_MESSAGE -> {
+                        BaseDto.Action.NEW_MESSAGE -> {
                             val newMessageDto =
                                 gson.fromJson(baseDto.payload, MessageDto::class.java)
                             val message = Message(
@@ -93,21 +66,20 @@ class RemoteRepository(
                                 to = me,
                                 message = newMessageDto.message
                             )
-                            mutableMessages.emit(message)
+                            messages.emit(message)
                         }
-                        USERS_RECEIVED -> {
+                        BaseDto.Action.USERS_RECEIVED -> {
                             val usersReceivedDto =
                                 gson.fromJson(baseDto.payload, UsersReceivedDto::class.java)
-                            mutableUsers.emit(usersReceivedDto.users)
+                            users.emit(usersReceivedDto.users)
                         }
-                        PONG -> {
+                        BaseDto.Action.PONG -> {
                             timeoutPong = 15000L
                         }
-                        DISCONNECT -> {
+                        BaseDto.Action.DISCONNECT -> {
                             reconnect(me.name)
                         }
-                        else -> {
-                        }
+                        else -> {}
                     }
                 }
             }
@@ -119,14 +91,9 @@ class RemoteRepository(
         connect(userName)
     }
 
-    override suspend fun sendMessage(to: User, message: String) {
+    fun sendMessageToServer(message: String) {
         backgroundScope.launch(Dispatchers.IO) {
-            val sendMessageDto = SendMessageDto(me.id, to.id, message)
-            val baseDto = BaseDto(
-                SEND_MESSAGE,
-                gson.toJson(sendMessageDto)
-            )
-            output.println(gson.toJson(baseDto))
+            output.println(message)
         }
     }
 
@@ -159,7 +126,7 @@ class RemoteRepository(
                 }
             }
                 .onSuccess { ip -> Log.d(TAG, "Server IP: $ip") }
-                .onFailure { error("Failed to get server address", it) }
+                .onFailure { throw IllegalStateException("Failed to get server address", it) }
                 .getOrThrow()
         }
 
@@ -174,10 +141,10 @@ class RemoteRepository(
                 }
             }
                 .onSuccess { Log.d(TAG, "Connected") }
-                .onFailure { error("Connect to server failed", it) }
+                .onFailure { throw IllegalStateException("Connect to server failed", it) }
         }
 
-    private suspend fun getUserIdAsync(socket: Socket, input: BufferedReader, timeout: Int) =
+    private suspend fun getUserId(timeout: Int) =
         runInterruptible(backgroundScope.coroutineContext) {
             runCatching {
                 socket.soTimeout = timeout
@@ -188,26 +155,26 @@ class RemoteRepository(
                 connectedDto.id
             }
                 .onSuccess { userId -> Log.d(TAG, "User ID: $userId") }
-                .onFailure { error("Failed to get user id", it) }
+                .onFailure { throw IllegalStateException("Failed to get user id", it) }
                 .getOrThrow()
         }
 
-    private fun connectUser(output: PrintWriter, userId: String, userName: String) {
+    private fun connectUser(userId: String, userName: String) {
         backgroundScope.launch(Dispatchers.IO) {
             runCatching {
                 val connectDto = ConnectDto(userId, userName)
-                val baseDto = BaseDto(CONNECT, gson.toJson(connectDto))
+                val baseDto = BaseDto(BaseDto.Action.CONNECT, gson.toJson(connectDto))
                 output.println(gson.toJson(baseDto))
             }
                 .onSuccess { Log.d(TAG, "Sent user connect") }
-                .onFailure { error("User connecting failed", it) }
+                .onFailure { throw IllegalStateException("User connecting failed", it) }
         }
     }
 
-    private fun startPings(output: PrintWriter, userId: String) {
+    private fun startPings(userId: String) {
         backgroundScope.launch(Dispatchers.IO) {
             val baseDto = BaseDto(
-                PING,
+                BaseDto.Action.PING,
                 gson.toJson(PingDto(userId))
             )
             val pingMessage = gson.toJson(baseDto)
@@ -223,7 +190,7 @@ class RemoteRepository(
         backgroundScope.launch(Dispatchers.IO) {
             while (isActive) {
                 val baseDto = BaseDto(
-                    GET_USERS,
+                    BaseDto.Action.GET_USERS,
                     gson.toJson(GetUsersDto(userId))
                 )
                 val getUsersMessage = gson.toJson(baseDto)
@@ -233,24 +200,11 @@ class RemoteRepository(
         }
     }
 
-    private fun freeingResources() {
-        runCatching {
-            input.close()
-            output.close()
-            socket.close()
-        }
-    }
-
-    override suspend fun disconnect() {
-        withContext(NonCancellable) {
-            freeingResources()
-            backgroundScope.cancel()
-        }
-    }
-
-    private fun error(message: String, throwable: Throwable) {
-        Log.e(TAG, message, throwable)
-        mutableConnectState.value = ConnectState.Error(message)
+    fun disconnect() {
+        input.close()
+        output.close()
+        socket.close()
+        job.cancelChildren()
     }
 
     private fun isEmulator(): Boolean {
@@ -274,19 +228,18 @@ class RemoteRepository(
 
 
     private companion object {
-        val TAG: String = RemoteRepository::class.java.simpleName
+        val TAG: String = SocketHolder::class.java.simpleName
         const val EMULATOR_IP = "10.0.2.2"
         const val HOST_BROADCAST = "255.255.255.255"
         const val PORT_BROADCAST = 8888
         const val PORT_SERVER = 6666
 
-        const val TIMEOUT_BROADCAST = 15000
+        const val TIMEOUT_BROADCAST = 5000
         const val TIMEOUT_CONNECT_SERVER = 7000
         const val TIMEOUT_GET_UID = 5000
 
         const val PING_DELAY = 5000L
         const val USERS_REQUEST_DELAY = 4000L
-
         const val TIMEOUT_INFINITY = 0
     }
 }
