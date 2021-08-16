@@ -43,58 +43,17 @@ class SocketHolder @Inject constructor(private val gson: Gson) {
         startListening()
     }
 
-    private fun startListening() {
-        backgroundScope.launch(Dispatchers.IO) {
-            while (timeoutPong > 0 && isActive) {
-                val delayTime = 1000L
-                delay(delayTime)
-                timeoutPong -= delayTime
-            }
-            reconnect(me.name)
-        }
-        backgroundScope.launch(Dispatchers.IO) {
-            runCatching {
-                while (isActive) {
-                    val baseDto =
-                        gson.fromJson(runInterruptible { input.readLine() }, BaseDto::class.java)
-                    when (baseDto.action) {
-                        BaseDto.Action.NEW_MESSAGE -> {
-                            val newMessageDto =
-                                gson.fromJson(baseDto.payload, MessageDto::class.java)
-                            val message = Message(
-                                from = newMessageDto.from,
-                                to = me,
-                                message = newMessageDto.message
-                            )
-                            messages.emit(message)
-                        }
-                        BaseDto.Action.USERS_RECEIVED -> {
-                            val usersReceivedDto =
-                                gson.fromJson(baseDto.payload, UsersReceivedDto::class.java)
-                            users.emit(usersReceivedDto.users)
-                        }
-                        BaseDto.Action.PONG -> {
-                            timeoutPong = 15000L
-                        }
-                        BaseDto.Action.DISCONNECT -> {
-                            reconnect(me.name)
-                        }
-                        else -> {}
-                    }
-                }
-            }
-        }
-    }
-
-    private suspend fun reconnect(userName: String) {
-        disconnect()
-        connect(userName)
-    }
-
     fun sendMessageToServer(message: String) {
         backgroundScope.launch(Dispatchers.IO) {
             output.println(message)
         }
+    }
+
+    fun disconnect() {
+        input.close()
+        output.close()
+        socket.close()
+        job.cancelChildren()
     }
 
     private suspend fun getServerAddress(timeout: Int) =
@@ -186,6 +145,49 @@ class SocketHolder @Inject constructor(private val gson: Gson) {
         }
     }
 
+    private fun startListening() {
+        backgroundScope.launch(Dispatchers.IO) {
+            while (timeoutPong > 0 && isActive) {
+                val delayTime = 1000L
+                delay(delayTime)
+                timeoutPong -= delayTime
+            }
+            reconnect(me.name)
+        }
+        backgroundScope.launch(Dispatchers.IO) {
+            runCatching {
+                while (isActive) {
+                    val baseDto =
+                        gson.fromJson(runInterruptible { input.readLine() }, BaseDto::class.java)
+                    when (baseDto.action) {
+                        BaseDto.Action.NEW_MESSAGE -> {
+                            val newMessageDto =
+                                gson.fromJson(baseDto.payload, MessageDto::class.java)
+                            val message = Message(
+                                from = newMessageDto.from,
+                                to = me,
+                                message = newMessageDto.message
+                            )
+                            messages.emit(message)
+                        }
+                        BaseDto.Action.USERS_RECEIVED -> {
+                            val usersReceivedDto =
+                                gson.fromJson(baseDto.payload, UsersReceivedDto::class.java)
+                            users.emit(usersReceivedDto.users)
+                        }
+                        BaseDto.Action.PONG -> {
+                            timeoutPong = 15000L
+                        }
+                        BaseDto.Action.DISCONNECT -> {
+                            reconnect(me.name)
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
+    }
+
     private fun getUsers(userId: String) {
         backgroundScope.launch(Dispatchers.IO) {
             while (isActive) {
@@ -198,13 +200,6 @@ class SocketHolder @Inject constructor(private val gson: Gson) {
                 delay(USERS_REQUEST_DELAY)
             }
         }
-    }
-
-    fun disconnect() {
-        input.close()
-        output.close()
-        socket.close()
-        job.cancelChildren()
     }
 
     private fun isEmulator(): Boolean {
@@ -224,6 +219,11 @@ class SocketHolder @Inject constructor(private val gson: Gson) {
                 || Build.PRODUCT.contains("vbox86p")
                 || Build.PRODUCT.contains("emulator")
                 || Build.PRODUCT.contains("simulator"))
+    }
+
+    private suspend fun reconnect(userName: String) {
+        disconnect()
+        connect(userName)
     }
 
     private companion object {
