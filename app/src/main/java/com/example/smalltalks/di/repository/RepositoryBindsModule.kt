@@ -33,8 +33,5 @@ interface RepositoryBindsModule {
             : AuthorizationRepository
 
     @Binds
-    fun bindMessageDecorator(messageDecorator: MessageDecorator): MessageRepository
-
-    @Binds
     fun bindUsersRepository(usersRepositoryImpl: UsersRepositoryImpl): UsersRepository
 }

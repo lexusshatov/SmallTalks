@@ -16,5 +16,5 @@ class MessageRepositoryModule {
     fun provideMessageDecorator(
         @Repository messageRepository: MessageRepository,
         usersRepository: UsersRepository
-    ) = MessageDecorator(messageRepository, usersRepository)
+    ): MessageRepository = MessageDecorator(messageRepository, usersRepository)
 }
