@@ -3,12 +3,11 @@ package com.example.smalltalks.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.viewmodel.base.BaseViewModel
-import com.natife.example.domain.remote.AuthorizationRepository
-import com.natife.example.domain.remote.MessageRepository
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.local.DialogRepository
-import com.natife.example.domain.local.PreferencesRepository
-import com.natife.example.domain.remote.UsersRepository
+import com.natife.example.domain.repository.AuthorizationRepository
+import com.natife.example.domain.repository.MessageRepository
+import com.natife.example.domain.repository.PreferencesRepository
+import com.natife.example.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +19,6 @@ import javax.inject.Inject
 class UserListViewModel @Inject constructor(
     private val messageRepository: MessageRepository,
     private val authorizationRepository: AuthorizationRepository,
-    private val dialogRepository: DialogRepository,
     private val usersRepository: UsersRepository,
     private val preferencesRepository: PreferencesRepository
 ) : BaseViewModel<List<User>>(), PreferencesRepository by preferencesRepository {
@@ -37,7 +35,7 @@ class UserListViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             messageRepository.messages.collect {
-                dialogRepository.saveMessage(it)
+                messageRepository.saveMessage(it)
             }
         }
     }

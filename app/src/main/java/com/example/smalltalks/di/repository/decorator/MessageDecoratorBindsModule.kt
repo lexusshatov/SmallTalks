@@ -1,7 +1,7 @@
 package com.example.smalltalks.di.repository.decorator
 
 import com.example.data.repository.MessageDecorator
-import com.natife.example.domain.remote.MessageRepository
+import com.natife.example.domain.repository.MessageRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

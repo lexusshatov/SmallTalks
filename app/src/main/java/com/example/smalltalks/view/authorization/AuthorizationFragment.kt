@@ -11,7 +11,7 @@ import com.example.smalltalks.databinding.FragmentAuthorizationBinding
 import com.example.smalltalks.view.base.BaseFragment
 import com.example.smalltalks.view.userlist.UserListFragment
 import com.example.smalltalks.viewmodel.AuthorizationViewModel
-import com.natife.example.domain.remote.ConnectState
+import com.natife.example.domain.repository.ConnectState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

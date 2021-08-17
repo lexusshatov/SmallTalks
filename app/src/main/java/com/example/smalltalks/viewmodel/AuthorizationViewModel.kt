@@ -3,9 +3,9 @@ package com.example.smalltalks.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.smalltalks.viewmodel.base.BaseViewModel
-import com.natife.example.domain.remote.AuthorizationRepository
-import com.natife.example.domain.local.PreferencesRepository
-import com.natife.example.domain.remote.ConnectState
+import com.natife.example.domain.repository.AuthorizationRepository
+import com.natife.example.domain.repository.PreferencesRepository
+import com.natife.example.domain.repository.ConnectState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect

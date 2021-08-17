@@ -1,15 +1,13 @@
 package com.example.data.repository
 
 import com.natife.example.domain.Message
-import com.natife.example.domain.remote.MessageRepository
 import com.natife.example.domain.dto.User
-import com.natife.example.domain.local.DialogRepository
-import com.natife.example.domain.remote.UsersRepository
+import com.natife.example.domain.repository.MessageRepository
+import com.natife.example.domain.repository.UsersRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class MessageDecorator @Inject constructor(
-    private val dialogRepository: DialogRepository,
     private val messageRepository: MessageRepository,
     private val usersRepository: UsersRepository
 ) : MessageRepository {
@@ -23,7 +21,13 @@ class MessageDecorator @Inject constructor(
             to = to,
             message = message
         )
-        dialogRepository.saveMessage(messageDb)
+        messageRepository.saveMessage(messageDb)
         messageRepository.sendMessage(to, message)
     }
+
+    override fun getDialog(receiver: User) =
+        messageRepository.getDialog(receiver)
+
+    override suspend fun saveMessage(message: Message) =
+        messageRepository.saveMessage(message)
 }

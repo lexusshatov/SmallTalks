@@ -1,4 +1,4 @@
-package com.natife.example.domain.remote
+package com.natife.example.domain.repository
 
 import kotlinx.coroutines.flow.StateFlow
 

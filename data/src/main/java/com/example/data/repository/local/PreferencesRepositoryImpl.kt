@@ -2,7 +2,7 @@ package com.example.data.repository.local
 
 import android.content.Context
 import androidx.core.content.edit
-import com.natife.example.domain.local.PreferencesRepository
+import com.natife.example.domain.repository.PreferencesRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -11,22 +11,27 @@ class PreferencesRepositoryImpl @Inject constructor(
 ) : PreferencesRepository {
 
     private val preferences = context.getSharedPreferences(
-        DialogRepositoryImpl.USER_PREFERENCES,
+        USER_PREFERENCES,
         Context.MODE_PRIVATE
     )
 
     override fun deleteUserName() {
         preferences.edit {
-            remove(DialogRepositoryImpl.USER_NAME)
+            remove(USER_NAME)
         }
     }
 
     override fun getUserName(): String? =
-        preferences.getString(DialogRepositoryImpl.USER_NAME, null)
+        preferences.getString(USER_NAME, null)
 
     override fun saveUserName(userName: String) {
         preferences.edit {
-            putString(DialogRepositoryImpl.USER_NAME, userName)
+            putString(USER_NAME, userName)
         }
+    }
+
+    companion object {
+        const val USER_NAME = "User_name"
+        const val USER_PREFERENCES = "User_preferences"
     }
 }

@@ -1,7 +1,7 @@
 package com.example.data.repository.remote
 
-import com.natife.example.domain.remote.ConnectState
-import com.natife.example.domain.remote.AuthorizationRepository
+import com.natife.example.domain.repository.ConnectState
+import com.natife.example.domain.repository.AuthorizationRepository
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

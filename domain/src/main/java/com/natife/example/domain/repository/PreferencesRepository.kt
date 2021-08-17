@@ -1,4 +1,4 @@
-package com.natife.example.domain.local
+package com.natife.example.domain.repository
 
 interface PreferencesRepository {
 
