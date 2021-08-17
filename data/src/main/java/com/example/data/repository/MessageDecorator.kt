@@ -5,9 +5,8 @@ import com.natife.example.domain.dto.User
 import com.natife.example.domain.repository.MessageRepository
 import com.natife.example.domain.repository.UsersRepository
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
-class MessageDecorator @Inject constructor(
+class MessageDecorator(
     private val messageRepository: MessageRepository,
     private val usersRepository: UsersRepository
 ) : MessageRepository {

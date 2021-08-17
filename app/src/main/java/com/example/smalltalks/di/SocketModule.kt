@@ -1,4 +1,4 @@
-package com.example.smalltalks.di.repository.remote
+package com.example.smalltalks.di
 
 import com.example.data.repository.remote.SocketHolder
 import com.google.gson.Gson
